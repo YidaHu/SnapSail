@@ -1,0 +1,90 @@
+Tests/SnapSailCoreTests/ScrollStitcherTests.swift
+  s_806fcff206d472::t_f3e1b99b27dc54 1-41
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_2e1c970c8c794c 1,3-7,9-25,39-43,46-129
+  s_806fcff206d472::t_513543ea6524c5 2,8,26-38,44-45
+Tests/SnapSailCoreTests/TestImageFactory.swift
+  s_806fcff206d472::t_f3e1b99b27dc54 1-48
+Sources/SnapSailCore/ScrollStitcher.swift
+  s_806fcff206d472::t_aeeab6eb7198db 52
+  s_806fcff206d472::t_6f5f40faeca4ff 1-51,53-74
+Sources/SnapSail/AppPreferences.swift
+  s_806fcff206d472::t_2e1c970c8c794c 1-94
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_2e1c970c8c794c 1-238
+Package.swift
+  s_806fcff206d472::t_f3e1b99b27dc54 1-22
+Resources/Info.plist
+  s_806fcff206d472::t_513543ea6524c5 1-32
+Sources/SnapSailCore/CaptureGeometry.swift
+  s_806fcff206d472::t_6f5f40faeca4ff 1-3,28-42
+  s_806fcff206d472::t_40f72cd840c52e 4-27
+Tests/SnapSailCoreTests/CaptureGeometryTests.swift
+  s_806fcff206d472::t_f3e1b99b27dc54 1-28,48
+  s_806fcff206d472::t_cc8a2b1bb44d43 29-47
+Sources/SnapSail/main.swift
+  s_806fcff206d472::t_f3e1b99b27dc54 2
+  s_806fcff206d472::t_2e1c970c8c794c 1,3-7
+Scripts/run-app.sh
+  s_806fcff206d472::t_513543ea6524c5 1-12
+Tests/SnapSailCoreTests/VerticalFrameMatcherTests.swift
+  s_806fcff206d472::t_f3e1b99b27dc54 1-33
+Sources/SnapSailCore/RGBAImageBuffer.swift
+  s_806fcff206d472::t_6f5f40faeca4ff 1-73
+Sources/SnapSail/CaptureService.swift
+  s_806fcff206d472::t_2e1c970c8c794c 1-4,6-85,87-104
+  s_806fcff206d472::t_962969655b794c 5,86
+Sources/SnapSail/ScrollCaptureController.swift
+  s_806fcff206d472::t_2e1c970c8c794c 1-157
+Sources/SnapSail/GlobalHotKeyManager.swift
+  s_806fcff206d472::t_513543ea6524c5 1-46,48-71
+  s_806fcff206d472::t_389940c24922b9 47
+.gitignore
+  s_806fcff206d472::t_513543ea6524c5 7
+Sources/SnapSailCore/VerticalFrameMatcher.swift
+  s_806fcff206d472::t_aeeab6eb7198db 60-61
+  s_806fcff206d472::t_6f5f40faeca4ff 1-59,62-81
+Sources/SnapSail/History.swift
+  s_806fcff206d472::t_33b565c67a937d 1-133
+Tests/SnapSailCoreTests/FilenameTemplateTests.swift
+  s_806fcff206d472::t_aeeab6eb7198db 6
+  s_806fcff206d472::t_f3e1b99b27dc54 1-5,7-32
+README.md
+  s_806fcff206d472::t_513543ea6524c5 1-19,22-32
+  s_806fcff206d472::t_a27264c51317b7 20-21
+Scripts/build-app.sh
+  s_806fcff206d472::t_513543ea6524c5 1-18
+Sources/SnapSail/AppDelegate.swift
+  s_806fcff206d472::t_2e1c970c8c794c 1-14
+Sources/SnapSail/EditorWindowController.swift
+  s_806fcff206d472::t_a27264c51317b7 169,182-206
+  s_806fcff206d472::t_33b565c67a937d 1-168,170-175,178-181,207
+  s_806fcff206d472::t_da8111f1854c9e 176-177
+Sources/SnapSail/SettingsWindowController.swift
+  s_806fcff206d472::t_33b565c67a937d 1-150
+Sources/SnapSail/AnnotationCanvasView.swift
+  s_806fcff206d472::t_33b565c67a937d 1-275
+Sources/SnapSailCore/FilenameTemplate.swift
+  s_806fcff206d472::t_6f5f40faeca4ff 1-22
+Sources/SnapSail/ImageUtilities.swift
+  s_806fcff206d472::t_33b565c67a937d 1-4,6-74,76-103
+  s_806fcff206d472::t_962969655b794c 5,75
+Sources/SnapSail/MenuBarController.swift
+  s_806fcff206d472::t_2e1c970c8c794c 1-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "16c7d7b87b5f3c268466cdb4bc84e3b2b306434b",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
