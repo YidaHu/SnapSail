@@ -204,7 +204,7 @@ final class SelectionOverlayView: NSView {
     private var interaction: RegionInteraction = .idle
     private let toolbar = InlineCaptureToolbar(frame: CGRect(origin: .zero, size: InlineCaptureToolbar.preferredSize))
     private let pinButton = CircularSymbolButton(symbol: "pin.fill", toolTip: "Pin on Screen", target: nil, action: nil)
-    private let sizeLabel = PillLabel()
+    private let sizeLabel = MeasurementPillView(frame: CGRect(x: 0, y: 0, width: 238, height: 50))
     private let loupe = SelectionLoupeView(frame: CGRect(x: 0, y: 0, width: 120, height: 86))
     private var annotationHistory = InlineAnnotationHistory()
     private var annotationDraft: InlineAnnotation?
@@ -280,7 +280,14 @@ final class SelectionOverlayView: NSView {
             SnapSailStyle.accent.setStroke()
             let border = NSBezierPath(rect: region.insetBy(dx: 1, dy: 1))
             border.lineWidth = 2
+            NSGraphicsContext.saveGraphicsState()
+            let shadow = NSShadow()
+            shadow.shadowColor = SnapSailStyle.accent.withAlphaComponent(0.58)
+            shadow.shadowBlurRadius = 12
+            shadow.shadowOffset = .zero
+            shadow.set()
             border.stroke()
+            NSGraphicsContext.restoreGraphicsState()
 
             InlineAnnotationRenderer.draw(
                 annotations: annotationHistory.annotations,
@@ -437,9 +444,8 @@ final class SelectionOverlayView: NSView {
         guard let target else { return }
 
         if controller?.selectionMode == .region {
-            sizeLabel.stringValue = "\(Int(target.width))  🔒  \(Int(target.height))  pt"
-            sizeLabel.font = .monospacedDigitSystemFont(ofSize: 20, weight: .semibold)
-            let labelWidth = max(210, sizeLabel.intrinsicContentSize.width + 28)
+            sizeLabel.setSize(target.size)
+            let labelWidth: CGFloat = 238
             var labelY = target.maxY + 14
             if labelY + 50 > bounds.maxY { labelY = target.maxY - 58 }
             sizeLabel.frame = CGRect(
@@ -593,19 +599,34 @@ final class SelectionOverlayView: NSView {
     }
 
     private func drawHandles(for region: CGRect) {
-        let points = [
-            CGPoint(x: region.minX, y: region.minY), CGPoint(x: region.midX, y: region.minY), CGPoint(x: region.maxX, y: region.minY),
-            CGPoint(x: region.maxX, y: region.midY), CGPoint(x: region.maxX, y: region.maxY), CGPoint(x: region.midX, y: region.maxY),
-            CGPoint(x: region.minX, y: region.maxY), CGPoint(x: region.minX, y: region.midY)
+        let length: CGFloat = min(38, max(14, min(region.width, region.height) * 0.12))
+        let corners: [(CGPoint, CGFloat, CGFloat)] = [
+            (CGPoint(x: region.minX, y: region.minY), 1, 1),
+            (CGPoint(x: region.maxX, y: region.minY), -1, 1),
+            (CGPoint(x: region.maxX, y: region.maxY), -1, -1),
+            (CGPoint(x: region.minX, y: region.maxY), 1, -1)
         ]
-        for point in points {
-            let rect = CGRect(x: point.x - 4, y: point.y - 4, width: 8, height: 8)
+        SnapSailStyle.accent.setStroke()
+        for (point, horizontalDirection, verticalDirection) in corners {
+            let path = NSBezierPath()
+            path.move(to: CGPoint(x: point.x + horizontalDirection * length, y: point.y))
+            path.line(to: point)
+            path.line(to: CGPoint(x: point.x, y: point.y + verticalDirection * length))
+            path.lineWidth = 4
+            path.lineCapStyle = .square
+            path.stroke()
+        }
+
+        let edgePoints = [
+            CGPoint(x: region.midX, y: region.minY), CGPoint(x: region.maxX, y: region.midY),
+            CGPoint(x: region.midX, y: region.maxY), CGPoint(x: region.minX, y: region.midY)
+        ]
+        for point in edgePoints {
             NSColor.white.setFill()
-            NSBezierPath(ovalIn: rect).fill()
+            let handle = CGRect(x: point.x - 3, y: point.y - 3, width: 6, height: 6)
+            handle.fill()
             SnapSailStyle.accent.setStroke()
-            let outline = NSBezierPath(ovalIn: rect)
-            outline.lineWidth = 1.5
-            outline.stroke()
+            NSBezierPath(rect: handle).stroke()
         }
     }
 
