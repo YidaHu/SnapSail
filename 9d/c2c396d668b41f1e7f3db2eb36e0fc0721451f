@@ -1,0 +1,21 @@
+Sources/SnapSailCore/InlineAnnotationModel.swift
+  s_806fcff206d472::t_ab3db51b7ae113 1-98
+Tests/SnapSailCoreTests/InlineAnnotationModelTests.swift
+  s_806fcff206d472::t_7d8a59cd0f592e 1-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9dc2c396d668b41f1e7f3db2eb36e0fc0721451f",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
