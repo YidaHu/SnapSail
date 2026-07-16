@@ -20,26 +20,11 @@ enum InlineAnnotationRenderer {
         annotations: [InlineAnnotation],
         selectionPointSize: CGSize
     ) -> CGImage? {
-        guard !annotations.isEmpty else { return base }
-        let pixelSize = NSSize(width: base.width, height: base.height)
-        let sourceImage = NSImage(cgImage: base, size: pixelSize)
-        let output = NSImage(size: pixelSize)
-        output.lockFocus()
-        NSGraphicsContext.current?.imageInterpolation = .high
-        sourceImage.draw(in: CGRect(origin: .zero, size: pixelSize))
-
-        let scaleX = CGFloat(base.width) / max(1, selectionPointSize.width)
-        let scaleY = CGFloat(base.height) / max(1, selectionPointSize.height)
-        let lineScale = (scaleX + scaleY) / 2
-        let renderRect = CGRect(origin: .zero, size: pixelSize)
-        for annotation in annotations {
-            draw(annotation, in: renderRect, lineScale: lineScale, sourceImage: sourceImage)
-        }
-        output.unlockFocus()
-
-        guard let data = output.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: data) else { return nil }
-        return bitmap.cgImage
+        InlineAnnotationRasterizer.render(
+            base: base,
+            annotations: annotations,
+            selectionPointSize: selectionPointSize
+        )
     }
 
     private static func draw(
