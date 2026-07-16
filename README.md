@@ -134,6 +134,7 @@ Open the SnapSail menu-bar icon and choose **Settings…**.
 
 ### General
 
+- Launch SnapSail automatically at login using the macOS Login Items service
 - Play a completion sound
 - Show capture notifications
 - Keep or disable local capture history
@@ -202,6 +203,7 @@ Important components:
 - `ScrollCaptureController` schedules frames and updates the long-image preview.
 - `VerticalFrameMatcher` and `ScrollStitcher` detect overlap and append new rows.
 - `InlineAnnotationRasterizer` renders annotations into the exported image.
+- `LaunchAtLoginController` reads and updates the native macOS Login Items state.
 - `AppPreferences` persists capture, export, language, and shortcut settings.
 
 ## Testing

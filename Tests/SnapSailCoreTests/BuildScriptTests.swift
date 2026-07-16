@@ -18,5 +18,9 @@ final class BuildScriptTests: XCTestCase {
             script.contains("SNAPSAIL_CODESIGN_IDENTITY"),
             "The release script must use a persistent signing identity."
         )
+        XCTAssertTrue(
+            script.contains("SMAppService.h") && script.contains("DEVELOPER_DIR"),
+            "Release builds must prefer an installed SDK that supports the native login-item API."
+        )
     }
 }

@@ -12,7 +12,8 @@ public enum AppLanguage: String, CaseIterable {
 
 public enum AppTextKey: String, CaseIterable {
     case general, capture, scrolling, export, shortcuts, preferencesTitle, language
-    case appBehavior, playSound, showNotification, keepHistory, privacyHint
+    case appBehavior, launchAtLogin, launchAtLoginApproval, launchAtLoginUnavailable, launchAtLoginFailed
+    case playSound, showNotification, keepHistory, privacyHint
     case screenshotBehavior, includeWindowShadow, copyAfterCapture, saveAfterCapture, shadowHint
     case scrollingCapture, scrollSlow, scrollSlowDetail, stopStable, stopStableDetail, maxPixels, maxPixelsDetail
     case fileOutput, format, jpegQuality, filenamePrefix, saveFolder, choose
@@ -45,7 +46,11 @@ public enum AppLocalization {
         .english: [
             .general: "General", .capture: "Capture", .scrolling: "Scrolling", .export: "Export",
             .shortcuts: "Shortcuts", .preferencesTitle: "SnapSail Preferences", .language: "Language:",
-            .appBehavior: "App behavior", .playSound: "Play a subtle sound after capture",
+            .appBehavior: "App behavior", .launchAtLogin: "Launch SnapSail at login",
+            .launchAtLoginApproval: "Approval is required in System Settings → General → Login Items.",
+            .launchAtLoginUnavailable: "Launch at login requires macOS 13 or later.",
+            .launchAtLoginFailed: "Couldn’t Change Login Item",
+            .playSound: "Play a subtle sound after capture",
             .showNotification: "Show a notification when capture completes",
             .keepHistory: "Keep capture history on this Mac",
             .privacyHint: "Your screenshots and history never leave this Mac.",
@@ -96,7 +101,11 @@ public enum AppLocalization {
         .simplifiedChinese: [
             .general: "通用", .capture: "截图", .scrolling: "滚动截图", .export: "导出",
             .shortcuts: "快捷键", .preferencesTitle: "SnapSail 偏好设置", .language: "语言：",
-            .appBehavior: "应用行为", .playSound: "截图完成后播放提示音",
+            .appBehavior: "应用行为", .launchAtLogin: "登录时启动 SnapSail",
+            .launchAtLoginApproval: "需要在“系统设置 → 通用 → 登录项”中批准。",
+            .launchAtLoginUnavailable: "开机自动启动需要 macOS 13 或更高版本。",
+            .launchAtLoginFailed: "无法更改登录项",
+            .playSound: "截图完成后播放提示音",
             .showNotification: "截图完成后显示通知", .keepHistory: "在本机保留截图历史",
             .privacyHint: "你的截图和历史记录始终保存在本机。",
             .screenshotBehavior: "截图行为", .includeWindowShadow: "包含窗口阴影",

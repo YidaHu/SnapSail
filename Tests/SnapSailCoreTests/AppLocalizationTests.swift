@@ -8,6 +8,8 @@ final class AppLocalizationTests: XCTestCase {
         XCTAssertEqual(AppLocalization.text(.saveAndCopy, language: .english), "Download")
         XCTAssertEqual(AppLocalization.text(.saveAndCopy, language: .simplifiedChinese), "下载")
         XCTAssertEqual(AppLanguage.simplifiedChinese.displayName, "简体中文")
+        XCTAssertEqual(AppLocalization.text(.launchAtLogin, language: .english), "Launch SnapSail at login")
+        XCTAssertEqual(AppLocalization.text(.launchAtLogin, language: .simplifiedChinese), "登录时启动 SnapSail")
     }
 
     func testEveryKeyHasCompleteNonEmptyTranslations() {

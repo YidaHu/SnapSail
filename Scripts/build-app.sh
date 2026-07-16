@@ -4,8 +4,15 @@ set -euo pipefail
 ROOT_DIR="${0:A:h:h}"
 cd "$ROOT_DIR"
 
-swift build -c release -j 1
-BIN_DIR="$(swift build -c release --show-bin-path)"
+MODERN_DEVELOPER_DIR="/Library/Developer/CommandLineTools"
+MODERN_SERVICE_MANAGEMENT_HEADER="$MODERN_DEVELOPER_DIR/SDKs/MacOSX.sdk/System/Library/Frameworks/ServiceManagement.framework/Headers/SMAppService.h"
+if [[ -z "${DEVELOPER_DIR:-}" && -f "$MODERN_SERVICE_MANAGEMENT_HEADER" ]]; then
+    export DEVELOPER_DIR="$MODERN_DEVELOPER_DIR"
+fi
+
+RELEASE_SCRATCH_PATH="$ROOT_DIR/.build-release"
+swift build --scratch-path "$RELEASE_SCRATCH_PATH" -c release -j 1
+BIN_DIR="$(swift build --scratch-path "$RELEASE_SCRATCH_PATH" -c release --show-bin-path)"
 APP_DIR="$ROOT_DIR/build/SnapSail.app"
 SIGNING_IDENTITY="${SNAPSAIL_CODESIGN_IDENTITY:-OpenTypeless Local Code Signing 2026}"
 

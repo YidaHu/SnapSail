@@ -27,6 +27,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private let preferences: AppPreferences
+    private let launchAtLogin: LaunchAtLoginManaging
     private let onShortcutChange: (CaptureShortcutAction, KeyboardShortcut) -> Bool
     private let onLanguageChange: () -> Void
     private var pageViews: [Page: NSView] = [:]
@@ -38,6 +39,7 @@ final class SettingsWindowController: NSWindowController {
     private var qualityLabel: NSTextField!
     private var shadowButton: NSButton!
     private var soundButton: NSButton!
+    private var launchAtLoginButton: NSButton!
     private var notificationButton: NSButton!
     private var historyButton: NSButton!
     private var copyButton: NSButton!
@@ -49,10 +51,12 @@ final class SettingsWindowController: NSWindowController {
 
     init(
         preferences: AppPreferences,
+        launchAtLogin: LaunchAtLoginManaging = LaunchAtLoginController(),
         onShortcutChange: @escaping (CaptureShortcutAction, KeyboardShortcut) -> Bool = { _, _ in false },
         onLanguageChange: @escaping () -> Void = {}
     ) {
         self.preferences = preferences
+        self.launchAtLogin = launchAtLogin
         self.onShortcutChange = onShortcutChange
         self.onLanguageChange = onLanguageChange
         let window = NSWindow(
@@ -114,15 +118,19 @@ final class SettingsWindowController: NSWindowController {
 
         let general = makePage()
         addSectionTitle(L10n.text(.appBehavior), y: 430, to: general)
-        soundButton = addCheckbox(L10n.text(.playSound), y: 370, to: general)
-        notificationButton = addCheckbox(L10n.text(.showNotification), y: 332, to: general)
-        historyButton = addCheckbox(L10n.text(.keepHistory), y: 294, to: general)
+        launchAtLoginButton = addCheckbox(L10n.text(.launchAtLogin), y: 378, to: general)
+        launchAtLoginButton.identifier = NSUserInterfaceItemIdentifier("settings.launchAtLogin")
+        launchAtLoginButton.target = self
+        launchAtLoginButton.action = #selector(launchAtLoginChanged)
+        soundButton = addCheckbox(L10n.text(.playSound), y: 340, to: general)
+        notificationButton = addCheckbox(L10n.text(.showNotification), y: 302, to: general)
+        historyButton = addCheckbox(L10n.text(.keepHistory), y: 264, to: general)
         languagePopup = NSPopUpButton(frame: .zero)
         languagePopup.addItems(withTitles: AppLanguage.allCases.map(\.displayName))
         languagePopup.target = self
         languagePopup.action = #selector(languageChanged)
-        addRow(label: L10n.text(.language), control: languagePopup, y: 238, width: 180, to: general)
-        addHint(L10n.text(.privacyHint), y: 180, to: general)
+        addRow(label: L10n.text(.language), control: languagePopup, y: 210, width: 180, to: general)
+        addHint(L10n.text(.privacyHint), y: 154, to: general)
         pageViews[.general] = general
 
         let capture = makePage()
@@ -216,6 +224,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func loadValues() {
+        loadLaunchAtLoginState()
         shadowButton?.state = preferences.includeWindowShadow ? .on : .off
         soundButton?.state = preferences.playSound ? .on : .off
         notificationButton?.state = preferences.showNotification ? .on : .off
@@ -236,6 +245,47 @@ final class SettingsWindowController: NSWindowController {
     @objc private func qualityChanged() {
         qualityLabel.stringValue = "\(Int(qualitySlider.doubleValue * 100))%"
         saveValues()
+    }
+
+    @objc private func launchAtLoginChanged() {
+        do {
+            try launchAtLogin.setEnabled(launchAtLoginButton.state == .on)
+        } catch {
+            showLaunchAtLoginAlert(error: error)
+        }
+        loadLaunchAtLoginState()
+    }
+
+    private func loadLaunchAtLoginState() {
+        guard let launchAtLoginButton else { return }
+        switch launchAtLogin.status {
+        case .disabled:
+            launchAtLoginButton.state = .off
+            launchAtLoginButton.isEnabled = true
+            launchAtLoginButton.toolTip = nil
+        case .enabled:
+            launchAtLoginButton.state = .on
+            launchAtLoginButton.isEnabled = true
+            launchAtLoginButton.toolTip = nil
+        case .requiresApproval:
+            launchAtLoginButton.state = .on
+            launchAtLoginButton.isEnabled = true
+            launchAtLoginButton.toolTip = L10n.text(.launchAtLoginApproval)
+        case .unavailable:
+            launchAtLoginButton.state = .off
+            launchAtLoginButton.isEnabled = false
+            launchAtLoginButton.toolTip = L10n.text(.launchAtLoginUnavailable)
+        }
+    }
+
+    private func showLaunchAtLoginAlert(error: Error) {
+        let alert = NSAlert()
+        alert.messageText = L10n.text(.launchAtLoginFailed)
+        alert.informativeText = error.localizedDescription
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: L10n.text(.ok))
+        if let window { alert.beginSheetModal(for: window) }
+        else { alert.runModal() }
     }
 
     @objc private func languageChanged() {
