@@ -22,6 +22,7 @@ final class ScrollCaptureController: NSObject {
     private var isProcessing = false
     private var stopped = false
     private var failures = 0
+    private var lastPreviewAt = Date.distantPast
 
     init(rect: CGRect, captureService: CaptureService, completion: @escaping (CGImage?) -> Void) {
         self.rect = rect
@@ -59,7 +60,18 @@ final class ScrollCaptureController: NSObject {
             guard let self else { return }
             let image = self.captureService.capture(quartzRect: quartzRect)
             let result = image.map(self.stitcher.append)
-            let previewImage = self.stitcher.makeImage()
+            let now = Date()
+            let shouldRefreshPreview: Bool
+            switch result {
+            case .started, .reachedMaximum, .incompatibleFrame:
+                shouldRefreshPreview = true
+            case .appended:
+                shouldRefreshPreview = now.timeIntervalSince(self.lastPreviewAt) >= 0.5
+            default:
+                shouldRefreshPreview = false
+            }
+            let previewImage = shouldRefreshPreview ? self.stitcher.makeImage() : nil
+            if shouldRefreshPreview { self.lastPreviewAt = now }
             DispatchQueue.main.async {
                 self.isProcessing = false
                 self.apply(result: result, previewImage: previewImage)
@@ -96,7 +108,7 @@ final class ScrollCaptureController: NSObject {
     }
 
     private func showPanel() {
-        let panelSize = NSSize(width: 300, height: 330)
+        let panelSize = NSSize(width: 252, height: 352)
         let visibleFrame = NSScreen.main?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1000, height: 800)
         var x = rect.maxX + 12
         if x + panelSize.width > visibleFrame.maxX { x = max(visibleFrame.minX, rect.minX - panelSize.width - 12) }
@@ -104,39 +116,62 @@ final class ScrollCaptureController: NSObject {
 
         let panel = NSPanel(
             contentRect: CGRect(origin: CGPoint(x: x, y: y), size: panelSize),
-            styleMask: [.titled, .fullSizeContentView, .nonactivatingPanel],
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
-        panel.title = "Scrolling Capture"
         panel.level = .floating
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
+        panel.hasShadow = false
 
-        let root = NSView(frame: CGRect(origin: .zero, size: panelSize))
-        let preview = NSImageView(frame: CGRect(x: 18, y: 72, width: 264, height: 218))
+        let root = MaterialCardView(frame: CGRect(origin: CGPoint(x: 6, y: 8), size: NSSize(width: 240, height: 338)))
+        root.autoresizingMask = [.width, .height]
+
+        let title = NSTextField(labelWithString: "Scrolling Capture")
+        title.frame = CGRect(x: 16, y: 300, width: 172, height: 22)
+        title.font = .systemFont(ofSize: 14, weight: .semibold)
+        root.addSubview(title)
+
+        let live = PillLabel(text: "LIVE", color: .systemGreen)
+        live.frame = CGRect(x: 188, y: 302, width: 36, height: 18)
+        live.font = .monospacedDigitSystemFont(ofSize: 9, weight: .bold)
+        root.addSubview(live)
+
+        let previewContainer = NSView(frame: CGRect(x: 14, y: 74, width: 212, height: 216))
+        previewContainer.wantsLayer = true
+        previewContainer.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.06).cgColor
+        previewContainer.layer?.cornerRadius = 8
+        previewContainer.layer?.masksToBounds = true
+        root.addSubview(previewContainer)
+
+        let preview = NSImageView(frame: previewContainer.bounds.insetBy(dx: 8, dy: 8))
         preview.imageScaling = .scaleProportionallyDown
-        preview.wantsLayer = true
-        preview.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
-        preview.layer?.cornerRadius = 8
-        root.addSubview(preview)
+        preview.autoresizingMask = [.width, .height]
+        previewContainer.addSubview(preview)
 
         let status = NSTextField(labelWithString: "Starting capture…")
-        status.frame = CGRect(x: 18, y: 45, width: 264, height: 20)
+        status.frame = CGRect(x: 14, y: 48, width: 212, height: 18)
         status.alignment = .center
-        status.font = .systemFont(ofSize: 12)
+        status.font = .systemFont(ofSize: 11, weight: .medium)
+        status.textColor = .secondaryLabelColor
+        status.lineBreakMode = .byTruncatingMiddle
         root.addSubview(status)
 
-        let finish = NSButton(title: "Finish", target: self, action: #selector(finishCapture))
-        finish.frame = CGRect(x: 66, y: 10, width: 90, height: 30)
+        let finish = PrimaryButton(title: "Finish", target: self, action: #selector(finishCapture))
+        finish.frame = CGRect(x: 116, y: 12, width: 108, height: 30)
         finish.keyEquivalent = "\r"
         root.addSubview(finish)
 
-        let cancel = NSButton(title: "Cancel", target: self, action: #selector(cancelCapture))
-        cancel.frame = CGRect(x: 158, y: 10, width: 80, height: 30)
+        let cancel = SymbolButton(symbol: "xmark", toolTip: "Cancel", target: self, action: #selector(cancelCapture))
+        cancel.frame = CGRect(x: 14, y: 11, width: 32, height: 32)
         cancel.keyEquivalent = "\u{1b}"
         root.addSubview(cancel)
 
-        panel.contentView = root
+        let host = NSView(frame: CGRect(origin: .zero, size: panelSize))
+        host.addSubview(root)
+        panel.contentView = host
         panel.orderFrontRegardless()
         self.panel = panel
         self.statusLabel = status

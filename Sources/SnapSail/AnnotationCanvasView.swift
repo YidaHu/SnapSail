@@ -24,6 +24,20 @@ enum AnnotationTool: Int, CaseIterable {
         case .number: return "Number"
         }
     }
+
+    var symbolName: String {
+        switch self {
+        case .arrow: return "arrow.up.right"
+        case .line: return "line.diagonal"
+        case .rectangle: return "rectangle"
+        case .ellipse: return "circle"
+        case .pen: return "pencil.tip"
+        case .text: return "textformat"
+        case .highlight: return "highlighter"
+        case .pixelate: return "eye.slash"
+        case .number: return "number.circle"
+        }
+    }
 }
 
 private struct Annotation {

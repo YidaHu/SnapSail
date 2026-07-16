@@ -20,12 +20,12 @@ final class MenuBarController: NSObject {
 
     private func makeMenu() -> NSMenu {
         let menu = NSMenu(title: "SnapSail")
-        menu.addItem(item("Capture Area", action: #selector(captureArea), key: "2"))
-        menu.addItem(item("Capture Window", action: #selector(captureWindow), key: "3"))
-        menu.addItem(item("Scrolling Capture", action: #selector(scrollingCapture), key: "4"))
+        menu.addItem(item("Capture Area", symbol: "viewfinder", action: #selector(captureArea), key: "2", modifiers: [.command, .shift]))
+        menu.addItem(item("Capture Window", symbol: "macwindow", action: #selector(captureWindow), key: "3", modifiers: [.command, .shift]))
+        menu.addItem(item("Scrolling Capture", symbol: "arrow.down.to.line.compact", action: #selector(scrollingCapture), key: "4", modifiers: [.command, .shift]))
         menu.addItem(.separator())
-        menu.addItem(item("Capture History", action: #selector(showHistory), key: "h"))
-        menu.addItem(item("Settings…", action: #selector(showSettings), key: ","))
+        menu.addItem(item("Capture History", symbol: "clock.arrow.circlepath", action: #selector(showHistory), key: "h", modifiers: [.command]))
+        menu.addItem(item("Settings…", symbol: "gearshape", action: #selector(showSettings), key: ",", modifiers: [.command]))
         menu.addItem(.separator())
 
         let about = NSMenuItem(title: "About SnapSail", action: #selector(showAbout), keyEquivalent: "")
@@ -37,10 +37,11 @@ final class MenuBarController: NSObject {
         return menu
     }
 
-    private func item(_ title: String, action: Selector, key: String) -> NSMenuItem {
+    private func item(_ title: String, symbol: String, action: Selector, key: String, modifiers: NSEvent.ModifierFlags) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
         item.target = self
-        item.keyEquivalentModifierMask = [.command, .shift]
+        item.image = SnapSailStyle.symbol(symbol, size: 14, weight: .regular)
+        item.keyEquivalentModifierMask = modifiers
         return item
     }
 

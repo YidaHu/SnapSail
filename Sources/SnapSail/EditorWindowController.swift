@@ -4,7 +4,9 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
     private let canvas: AnnotationCanvasView
     private let preferences: AppPreferences
     private let onClose: (EditorWindowController) -> Void
-    private var toolButtons: [NSButton] = []
+    private var toolButtons: [SymbolButton] = []
+    private weak var undoButton: SymbolButton?
+    private weak var redoButton: SymbolButton?
 
     init(image: CGImage, preferences: AppPreferences, onClose: @escaping (EditorWindowController) -> Void) {
         canvas = AnnotationCanvasView(image: image)
@@ -15,11 +17,14 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
         let size = NSSize(width: min(1100, visible.width * 0.82), height: min(760, visible.height * 0.82))
         let window = NSWindow(
             contentRect: CGRect(origin: .zero, size: size),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         window.title = "SnapSail Editor"
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.backgroundColor = NSColor(calibratedWhite: 0.12, alpha: 1)
         window.center()
         super.init(window: window)
         window.delegate = self
@@ -40,58 +45,77 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
     private func buildInterface(size: NSSize) {
         guard let content = window?.contentView else { return }
 
-        let toolbar = NSVisualEffectView(frame: CGRect(x: 0, y: size.height - 52, width: size.width, height: 52))
+        let toolbar = NSVisualEffectView(frame: CGRect(x: 0, y: size.height - 56, width: size.width, height: 56))
         toolbar.material = .headerView
         toolbar.blendingMode = .withinWindow
         toolbar.autoresizingMask = [.width, .minYMargin]
         content.addSubview(toolbar)
 
-        var x: CGFloat = 12
+        var x: CGFloat = 76
         for tool in AnnotationTool.allCases {
-            let button = NSButton(title: tool.title, target: self, action: #selector(selectTool(_:)))
+            let button = SymbolButton(symbol: tool.symbolName, toolTip: tool.title, target: self, action: #selector(selectTool(_:)))
             button.tag = tool.rawValue
-            button.setButtonType(.toggle)
-            button.bezelStyle = .texturedRounded
-            button.sizeToFit()
-            button.frame = CGRect(x: x, y: 11, width: max(58, button.frame.width + 10), height: 30)
-            if tool == .arrow { button.state = .on }
+            button.frame = CGRect(x: x, y: 11, width: 34, height: 34)
+            if tool == .arrow { button.isSelected = true }
             toolbar.addSubview(button)
             toolButtons.append(button)
-            x += button.frame.width + 5
+            x += 38
         }
 
-        let scroll = NSScrollView(frame: CGRect(x: 0, y: 54, width: size.width, height: size.height - 106))
+        let separator = NSBox(frame: CGRect(x: x + 3, y: 16, width: 1, height: 24))
+        separator.boxType = .separator
+        toolbar.addSubview(separator)
+
+        let color = SymbolButton(symbol: "paintpalette", toolTip: "Color", target: self, action: #selector(chooseColor))
+        color.frame = CGRect(x: x + 13, y: 11, width: 34, height: 34)
+        toolbar.addSubview(color)
+
+        let scroll = NSScrollView(frame: CGRect(x: 0, y: 56, width: size.width, height: size.height - 112))
         scroll.autoresizingMask = [.width, .height]
         scroll.hasVerticalScroller = true
         scroll.hasHorizontalScroller = true
-        scroll.backgroundColor = .controlBackgroundColor
-        canvas.frame = scroll.bounds.insetBy(dx: 24, dy: 24)
+        scroll.drawsBackground = true
+        scroll.backgroundColor = NSColor(calibratedWhite: 0.105, alpha: 1)
+        canvas.frame = scroll.bounds.insetBy(dx: 28, dy: 28)
         canvas.autoresizingMask = [.width, .height]
         scroll.documentView = canvas
         content.addSubview(scroll)
 
-        let bottom = NSVisualEffectView(frame: CGRect(x: 0, y: 0, width: size.width, height: 54))
+        let bottom = NSVisualEffectView(frame: CGRect(x: 0, y: 0, width: size.width, height: 56))
         bottom.material = .headerView
         bottom.blendingMode = .withinWindow
         bottom.autoresizingMask = [.width, .maxYMargin]
         content.addSubview(bottom)
 
-        addButton("Undo", action: #selector(undo), x: 14, to: bottom)
-        addButton("Redo", action: #selector(redo), x: 88, to: bottom)
-        addButton("Color", action: #selector(chooseColor), x: 174, to: bottom)
+        let undo = SymbolButton(symbol: "arrow.uturn.backward", toolTip: "Undo", target: self, action: #selector(undo))
+        undo.frame = CGRect(x: 16, y: 11, width: 34, height: 34)
+        bottom.addSubview(undo)
+        undoButton = undo
 
-        let save = addButton("Save…", action: #selector(save), x: size.width - 96, to: bottom)
+        let redo = SymbolButton(symbol: "arrow.uturn.forward", toolTip: "Redo", target: self, action: #selector(redo))
+        redo.frame = CGRect(x: 54, y: 11, width: 34, height: 34)
+        bottom.addSubview(redo)
+        redoButton = redo
+
+        let save = PrimaryButton(title: "Save…", target: self, action: #selector(save))
+        save.frame = CGRect(x: size.width - 104, y: 13, width: 88, height: 30)
+        bottom.addSubview(save)
         save.autoresizingMask = [.minXMargin]
-        let copy = addButton("Copy", action: #selector(copyImage), x: size.width - 176, to: bottom)
+
+        let copy = actionButton("Copy", symbol: "doc.on.doc", action: #selector(copyImage), x: size.width - 198, to: bottom)
         copy.autoresizingMask = [.minXMargin]
-        let pin = addButton("Pin", action: #selector(pinImage), x: size.width - 250, to: bottom)
+        let pin = actionButton("Pin", symbol: "pin", action: #selector(pinImage), x: size.width - 280, to: bottom)
         pin.autoresizingMask = [.minXMargin]
+        updateUndoButtons()
     }
 
     @discardableResult
-    private func addButton(_ title: String, action: Selector, x: CGFloat, to view: NSView) -> NSButton {
+    private func actionButton(_ title: String, symbol: String, action: Selector, x: CGFloat, to view: NSView) -> NSButton {
         let button = NSButton(title: title, target: self, action: action)
-        button.frame = CGRect(x: x, y: 12, width: 70, height: 30)
+        button.image = SnapSailStyle.symbol(symbol, size: 13)
+        button.imagePosition = .imageLeading
+        button.bezelStyle = .rounded
+        button.frame = CGRect(x: x, y: 13, width: 76, height: 30)
         view.addSubview(button)
         return button
     }
@@ -99,12 +123,15 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
     @objc private func selectTool(_ sender: NSButton) {
         guard let tool = AnnotationTool(rawValue: sender.tag) else { return }
         canvas.activeTool = tool
-        toolButtons.forEach { $0.state = $0 === sender ? .on : .off }
+        toolButtons.forEach { $0.isSelected = $0 === sender }
     }
 
     @objc private func undo() { canvas.undo() }
     @objc private func redo() { canvas.redo() }
-    private func updateUndoButtons() {}
+    private func updateUndoButtons() {
+        undoButton?.isEnabled = canvas.canUndo
+        redoButton?.isEnabled = canvas.canRedo
+    }
 
     @objc private func chooseColor() {
         let panel = NSColorPanel.shared
