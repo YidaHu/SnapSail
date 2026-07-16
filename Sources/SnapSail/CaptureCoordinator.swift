@@ -47,13 +47,16 @@ final class CaptureCoordinator {
 
     private func beginAreaCapture(scrolling: Bool) {
         guard ensurePermission() else { return }
-        selectionOverlay = SelectionOverlayController(mode: .region, captureService: captureService) { [weak self] result in
+        selectionOverlay = SelectionOverlayController(mode: .region, captureService: captureService) { [weak self] outcome in
             guard let self else { return }
             self.selectionOverlay = nil
-            guard case .region(let rect) = result else { return }
+            guard let outcome, case .region(let rect) = outcome.selection else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                if scrolling { self.startScrolling(rect: rect) }
-                else if let image = self.captureService.capture(appKitRect: rect) { self.presentEditor(image) }
+                let action: SelectionAction = scrolling ? .scroll : outcome.action
+                if action == .scroll { self.startScrolling(rect: rect) }
+                else if let image = self.captureService.capture(appKitRect: rect) {
+                    self.finishCapture(image, action: action)
+                }
                 else { self.showCaptureFailure() }
             }
         }
@@ -62,16 +65,16 @@ final class CaptureCoordinator {
 
     private func beginWindowCapture() {
         guard ensurePermission() else { return }
-        selectionOverlay = SelectionOverlayController(mode: .window, captureService: captureService) { [weak self] result in
+        selectionOverlay = SelectionOverlayController(mode: .window, captureService: captureService) { [weak self] outcome in
             guard let self else { return }
             self.selectionOverlay = nil
-            guard case .windows(let windows) = result else { return }
+            guard let outcome, case .windows(let windows) = outcome.selection else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 let images = windows.compactMap {
                     self.captureService.capture(window: $0, includeShadow: self.preferences.includeWindowShadow)
                 }
                 guard let image = ImageUtilities.stack(images: images) else { return self.showCaptureFailure() }
-                self.presentEditor(image)
+                self.finishCapture(image, action: outcome.action == .scroll ? .capture : outcome.action)
             }
         }
         selectionOverlay?.begin()
@@ -100,6 +103,21 @@ final class CaptureCoordinator {
         }
         editorControllers.append(controller)
         controller.showWindow(nil)
+    }
+
+    private func finishCapture(_ image: CGImage, action: SelectionAction) {
+        switch action {
+        case .capture, .scroll:
+            presentEditor(image)
+        case .copy:
+            if preferences.historyEnabled { historyStore.add(image: image) }
+            ImageExporter.copyToPasteboard(image)
+            if preferences.playSound { NSSound(named: "Tink")?.play() }
+        case .pin:
+            if preferences.historyEnabled { historyStore.add(image: image) }
+            PinWindowRegistry.shared.pin(image)
+            if preferences.playSound { NSSound(named: "Tink")?.play() }
+        }
     }
 
     private func ensurePermission() -> Bool {
