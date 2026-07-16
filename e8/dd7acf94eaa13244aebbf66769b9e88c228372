@@ -1,0 +1,24 @@
+README.md
+  s_806fcff206d472::t_84c208ae07436a 3-46,50-54,58-72,75-85,89-246,248,250-254,256,258,260-264,266,268,270,272,274
+.gitignore
+  s_806fcff206d472::t_84c208ae07436a 4-6,9,11-13
+  s_806fcff206d472::t_7e5771852d5de7 3
+LICENSE
+  s_806fcff206d472::t_84c208ae07436a 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "e8dd7acf94eaa13244aebbf66769b9e88c228372",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
