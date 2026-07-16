@@ -14,6 +14,7 @@ enum SelectionResult {
 enum SelectionAction {
     case capture
     case scroll
+    case save
     case copy
     case pin
 }
@@ -21,6 +22,8 @@ enum SelectionAction {
 struct SelectionOutcome {
     let selection: SelectionResult
     let action: SelectionAction
+    let annotations: [InlineAnnotation]
+    let selectionPointSize: CGSize
 }
 
 final class SelectionOverlayController: NSObject {
@@ -102,12 +105,22 @@ final class SelectionOverlayController: NSObject {
         switch mode {
         case .region:
             guard let view = activeView, let globalRect = view.globalSelectionRect else { return }
-            finish(SelectionOutcome(selection: .region(globalRect.integral), action: action))
+            finish(SelectionOutcome(
+                selection: .region(globalRect.integral),
+                action: action,
+                annotations: view.annotationSnapshot,
+                selectionPointSize: view.selectionPointSize
+            ))
         case .window:
             var selected = availableWindows.filter { selectedWindowIDs.contains($0.id) }
             if selected.isEmpty, let highlightedWindow { selected = [highlightedWindow] }
             guard !selected.isEmpty else { return }
-            finish(SelectionOutcome(selection: .windows(selected), action: action))
+            finish(SelectionOutcome(
+                selection: .windows(selected),
+                action: action,
+                annotations: [],
+                selectionPointSize: .zero
+            ))
         }
     }
 
@@ -180,6 +193,7 @@ private enum RegionInteraction {
     case dragging(start: CGPoint)
     case moving(last: CGPoint)
     case resizing(SelectionHandle)
+    case annotating
     case editing
 }
 
@@ -188,9 +202,16 @@ final class SelectionOverlayView: NSView {
     private let screen: NSScreen
     private var selection: SelectionModel
     private var interaction: RegionInteraction = .idle
-    private let toolbar = MaterialCardView(frame: CGRect(x: 0, y: 0, width: 212, height: 44))
+    private let toolbar = InlineCaptureToolbar(frame: CGRect(origin: .zero, size: InlineCaptureToolbar.preferredSize))
+    private let pinButton = CircularSymbolButton(symbol: "pin.fill", toolTip: "Pin on Screen", target: nil, action: nil)
     private let sizeLabel = PillLabel()
     private let loupe = SelectionLoupeView(frame: CGRect(x: 0, y: 0, width: 120, height: 86))
+    private var annotationHistory = InlineAnnotationHistory()
+    private var annotationDraft: InlineAnnotation?
+    private var activeTool: InlineAnnotationTool?
+    private var activeColor = InlineAnnotationColor.red
+    private var textAnchor: CGPoint?
+    private weak var inlineTextField: NSTextField?
 
     init(screen: NSScreen, controller: SelectionOverlayController) {
         self.screen = screen
@@ -198,10 +219,12 @@ final class SelectionOverlayView: NSView {
         selection = SelectionModel(bounds: CGRect(origin: .zero, size: screen.frame.size))
         super.init(frame: CGRect(origin: .zero, size: screen.frame.size))
         wantsLayer = true
-        buildToolbar()
+        configureToolbar()
         addSubview(sizeLabel)
+        addSubview(pinButton)
         addSubview(loupe)
         toolbar.isHidden = true
+        pinButton.isHidden = true
         sizeLabel.isHidden = true
         loupe.isHidden = true
     }
@@ -214,14 +237,22 @@ final class SelectionOverlayView: NSView {
         return window.convertToScreen(region)
     }
 
+    var annotationSnapshot: [InlineAnnotation] { annotationHistory.annotations }
+    var selectionPointSize: CGSize { selection.region?.size ?? .zero }
+
     func clearRegion() {
         selection = SelectionModel(bounds: bounds)
+        annotationHistory.removeAll()
+        annotationDraft = nil
+        activeTool = nil
+        toolbar.clearActiveTool()
         interaction = .idle
         updateControls()
         needsDisplay = true
     }
 
     func modeDidChange() {
+        annotationDraft = nil
         interaction = .idle
         updateControls()
         needsDisplay = true
@@ -251,6 +282,12 @@ final class SelectionOverlayView: NSView {
             border.lineWidth = 2
             border.stroke()
 
+            InlineAnnotationRenderer.draw(
+                annotations: annotationHistory.annotations,
+                draft: annotationDraft,
+                in: region
+            )
+
             if case .editing = interaction { drawHandles(for: region) }
         } else if let highlights = controller?.highlightRects(for: screen) {
             for (rect, selected) in highlights {
@@ -267,13 +304,23 @@ final class SelectionOverlayView: NSView {
             }
         }
 
-        drawInstruction()
+        if controller?.selectionMode == .window || selection.region == nil {
+            drawInstruction()
+        }
     }
 
     override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
         guard controller?.selectionMode == .region else {
             controller?.windowClicked(from: self, modifiers: event.modifierFlags)
+            return
+        }
+
+        if let tool = activeTool, let region = selection.region, region.contains(point) {
+            beginAnnotation(tool: tool, at: point, in: region)
+            loupe.isHidden = true
+            updateControls()
+            needsDisplay = true
             return
         }
 
@@ -284,6 +331,10 @@ final class SelectionOverlayView: NSView {
         } else {
             controller?.regionWillBegin(in: self)
             selection = SelectionModel(bounds: bounds)
+            annotationHistory.removeAll()
+            annotationDraft = nil
+            activeTool = nil
+            toolbar.clearActiveTool()
             selection.setRegion(CGRect(origin: point, size: CGSize(width: 1, height: 1)))
             interaction = .dragging(start: point)
         }
@@ -306,6 +357,8 @@ final class SelectionOverlayView: NSView {
             interaction = .moving(last: point)
         case .resizing(let handle):
             selection.resize(handle: handle, to: point)
+        case .annotating:
+            updateAnnotation(at: point)
         default: break
         }
         updateLoupe(at: point)
@@ -315,6 +368,14 @@ final class SelectionOverlayView: NSView {
 
     override func mouseUp(with event: NSEvent) {
         guard controller?.selectionMode == .region else { return }
+        if case .annotating = interaction {
+            updateAnnotation(at: convert(event.locationInWindow, from: nil))
+            commitDraftIfNeeded()
+            interaction = .editing
+            updateControls()
+            needsDisplay = true
+            return
+        }
         if let region = selection.region, region.width >= 24, region.height >= 24 {
             interaction = .editing
         } else {
@@ -338,9 +399,14 @@ final class SelectionOverlayView: NSView {
     }
 
     override func keyDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.command), event.charactersIgnoringModifiers == "z" {
+            if event.modifierFlags.contains(.shift) { redoAnnotation() }
+            else { undoAnnotation() }
+            return
+        }
         switch event.keyCode {
         case 53: controller?.cancel()
-        case 36: controller?.perform(.capture)
+        case 36: controller?.perform(.copy)
         case 49: controller?.toggleMode()
         case 123: controller?.nudgeSelection(dx: -1, dy: 0, accelerated: event.modifierFlags.contains(.shift))
         case 124: controller?.nudgeSelection(dx: 1, dy: 0, accelerated: event.modifierFlags.contains(.shift))
@@ -354,51 +420,164 @@ final class SelectionOverlayView: NSView {
         let target: CGRect?
         if controller?.selectionMode == .region {
             target = selection.region
-            let isEditing: Bool
-            if case .editing = interaction { isEditing = true } else { isEditing = false }
-            toolbar.isHidden = !isEditing
+            let isReady: Bool
+            switch interaction {
+            case .editing, .moving, .resizing, .annotating: isReady = true
+            default: isReady = false
+            }
+            toolbar.isHidden = !isReady
+            pinButton.isHidden = !isReady
             sizeLabel.isHidden = selection.region == nil
         } else {
             target = controller?.highlightRects(for: screen).last?.0
             toolbar.isHidden = target == nil
+            pinButton.isHidden = target == nil
             sizeLabel.isHidden = true
         }
         guard let target else { return }
 
         if controller?.selectionMode == .region {
-            sizeLabel.stringValue = "\(Int(target.width)) × \(Int(target.height))"
-            let labelWidth = max(74, sizeLabel.intrinsicContentSize.width + 18)
+            sizeLabel.stringValue = "\(Int(target.width))  🔒  \(Int(target.height))  pt"
+            sizeLabel.font = .monospacedDigitSystemFont(ofSize: 20, weight: .semibold)
+            let labelWidth = max(210, sizeLabel.intrinsicContentSize.width + 28)
+            var labelY = target.maxY + 14
+            if labelY + 50 > bounds.maxY { labelY = target.maxY - 58 }
             sizeLabel.frame = CGRect(
-                x: min(bounds.maxX - labelWidth - 8, target.minX),
-                y: min(bounds.maxY - 26, target.maxY + 7),
+                x: min(max(8, target.midX - labelWidth / 2), bounds.maxX - labelWidth - 8),
+                y: labelY,
                 width: labelWidth,
-                height: 22
+                height: 50
             )
         }
 
-        let toolbarX = min(max(8, target.midX - toolbar.frame.width / 2), bounds.maxX - toolbar.frame.width - 8)
-        var toolbarY = target.minY - toolbar.frame.height - 12
-        if toolbarY < 8 { toolbarY = min(bounds.maxY - toolbar.frame.height - 8, target.maxY + 12) }
+        let maximumToolbarX = max(12, bounds.maxX - toolbar.frame.width - 12)
+        let toolbarX = min(max(12, target.midX - toolbar.frame.width / 2), maximumToolbarX)
+        var toolbarY = target.minY - toolbar.frame.height - 34
+        if toolbarY < 12 {
+            toolbarY = min(bounds.maxY - toolbar.frame.height - 12, target.maxY + 74)
+        }
         toolbar.frame.origin = CGPoint(x: toolbarX, y: toolbarY)
+
+        var pinX = target.maxX + 16
+        if pinX + pinButton.frame.width > bounds.maxX - 8 { pinX = target.maxX - pinButton.frame.width - 12 }
+        var pinY = target.maxY - pinButton.frame.height
+        if pinY < 8 { pinY = target.minY + 8 }
+        pinButton.frame.origin = CGPoint(x: pinX, y: pinY)
+        toolbar.updateHistory(canUndo: annotationHistory.canUndo, canRedo: annotationHistory.canRedo)
     }
 
-    private func buildToolbar() {
+    private func configureToolbar() {
         addSubview(toolbar)
-        let definitions: [(String, String, Selector)] = [
-            ("checkmark", "Capture (Return)", #selector(capture)),
-            ("arrow.down.to.line.compact", "Scrolling Capture", #selector(startScrollingCapture)),
-            ("doc.on.doc", "Copy to Clipboard", #selector(copyImage)),
-            ("pin", "Pin on Screen", #selector(pin)),
-            ("xmark", "Cancel (Esc)", #selector(cancel))
-        ]
-        var x: CGFloat = 10
-        for (index, definition) in definitions.enumerated() {
-            let button = SymbolButton(symbol: definition.0, toolTip: definition.1, target: self, action: definition.2)
-            button.frame.origin = CGPoint(x: x, y: 6)
-            if index == 0 { button.isSelected = true }
-            toolbar.addSubview(button)
-            x += 40
+        toolbar.onToolSelected = { [weak self] tool in
+            self?.activeTool = tool
+            NSCursor.crosshair.set()
         }
+        toolbar.onColorChanged = { [weak self] color in self?.activeColor = color }
+        toolbar.onUndo = { [weak self] in self?.undoAnnotation() }
+        toolbar.onRedo = { [weak self] in self?.redoAnnotation() }
+        toolbar.onCancel = { [weak self] in self?.controller?.cancel() }
+        toolbar.onScroll = { [weak self] in self?.controller?.perform(.scroll) }
+        toolbar.onSave = { [weak self] in self?.controller?.perform(.save) }
+        toolbar.onCopy = { [weak self] in self?.controller?.perform(.copy) }
+        pinButton.target = self
+        pinButton.action = #selector(pin)
+    }
+
+    private func beginAnnotation(tool: InlineAnnotationTool, at point: CGPoint, in region: CGRect) {
+        let normalized = InlineAnnotation.normalizedPoint(point, in: region)
+        if tool == .number {
+            let nextNumber = annotationHistory.annotations.filter { $0.tool == .number }.count + 1
+            annotationHistory.commit(InlineAnnotation(
+                tool: .number,
+                start: normalized,
+                end: normalized,
+                number: nextNumber,
+                color: activeColor
+            ))
+            interaction = .editing
+            return
+        }
+        if tool == .text {
+            beginTextEditing(at: point, normalized: normalized)
+            interaction = .editing
+            return
+        }
+        annotationDraft = InlineAnnotation(
+            tool: tool,
+            start: normalized,
+            end: normalized,
+            points: tool == .pen || tool == .highlight ? [normalized] : [],
+            color: activeColor
+        )
+        interaction = .annotating
+    }
+
+    private func updateAnnotation(at point: CGPoint) {
+        guard let region = selection.region, var draft = annotationDraft else { return }
+        let normalized = InlineAnnotation.normalizedPoint(point, in: region)
+        draft.end = normalized
+        if draft.tool == .pen || draft.tool == .highlight { draft.points.append(normalized) }
+        annotationDraft = draft
+    }
+
+    private func commitDraftIfNeeded() {
+        guard let draft = annotationDraft, let region = selection.region else { return }
+        annotationDraft = nil
+        let distance = hypot(
+            (draft.end.x - draft.start.x) * region.width,
+            (draft.end.y - draft.start.y) * region.height
+        )
+        guard distance >= 3 || draft.points.count > 2 else { return }
+        annotationHistory.commit(draft)
+    }
+
+    private func beginTextEditing(at point: CGPoint, normalized: CGPoint) {
+        inlineTextField?.removeFromSuperview()
+        textAnchor = normalized
+        let width = min(220, max(100, bounds.maxX - point.x - 12))
+        let field = NSTextField(frame: CGRect(x: point.x, y: point.y - 15, width: width, height: 30))
+        field.placeholderString = "Type and press Return"
+        field.font = .systemFont(ofSize: 16, weight: .semibold)
+        field.focusRingType = .none
+        field.wantsLayer = true
+        field.layer?.cornerRadius = 6
+        field.layer?.borderColor = SnapSailStyle.accent.cgColor
+        field.layer?.borderWidth = 2
+        field.target = self
+        field.action = #selector(commitInlineText(_:))
+        addSubview(field)
+        inlineTextField = field
+        window?.makeFirstResponder(field)
+    }
+
+    @objc private func commitInlineText(_ sender: NSTextField) {
+        defer {
+            sender.removeFromSuperview()
+            textAnchor = nil
+            window?.makeFirstResponder(self)
+            updateControls()
+            needsDisplay = true
+        }
+        guard let textAnchor, !sender.stringValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        annotationHistory.commit(InlineAnnotation(
+            tool: .text,
+            start: textAnchor,
+            end: textAnchor,
+            text: sender.stringValue,
+            color: activeColor
+        ))
+    }
+
+    private func undoAnnotation() {
+        annotationHistory.undo()
+        updateControls()
+        needsDisplay = true
+    }
+
+    private func redoAnnotation() {
+        annotationHistory.redo()
+        updateControls()
+        needsDisplay = true
     }
 
     private func updateLoupe(at point: CGPoint) {
@@ -445,11 +624,7 @@ final class SelectionOverlayView: NSView {
         text.draw(at: CGPoint(x: bubble.minX + 14, y: bubble.minY + 6), withAttributes: attributes)
     }
 
-    @objc private func capture() { controller?.perform(.capture) }
-    @objc private func startScrollingCapture() { controller?.perform(.scroll) }
-    @objc private func copyImage() { controller?.perform(.copy) }
     @objc private func pin() { controller?.perform(.pin) }
-    @objc private func cancel() { controller?.cancel() }
 }
 
 private final class SelectionLoupeView: NSView {

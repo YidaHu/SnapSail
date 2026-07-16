@@ -54,8 +54,13 @@ final class CaptureCoordinator {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 let action: SelectionAction = scrolling ? .scroll : outcome.action
                 if action == .scroll { self.startScrolling(rect: rect) }
-                else if let image = self.captureService.capture(appKitRect: rect) {
-                    self.finishCapture(image, action: action)
+                else if let image = self.captureService.capture(appKitRect: rect),
+                        let rendered = InlineAnnotationRenderer.render(
+                            base: image,
+                            annotations: outcome.annotations,
+                            selectionPointSize: outcome.selectionPointSize
+                        ) {
+                    self.finishCapture(rendered, action: action)
                 }
                 else { self.showCaptureFailure() }
             }
@@ -83,7 +88,7 @@ final class CaptureCoordinator {
     private func startScrolling(rect: CGRect) {
         let controller = ScrollCaptureController(rect: rect, captureService: captureService) { [weak self] image in
             self?.scrollController = nil
-            if let image { self?.presentEditor(image) }
+            if let image { self?.finishCapture(image, action: .copy) }
         }
         scrollController = controller
         controller.start()
@@ -107,17 +112,35 @@ final class CaptureCoordinator {
 
     private func finishCapture(_ image: CGImage, action: SelectionAction) {
         switch action {
-        case .capture, .scroll:
-            presentEditor(image)
-        case .copy:
-            if preferences.historyEnabled { historyStore.add(image: image) }
-            ImageExporter.copyToPasteboard(image)
-            if preferences.playSound { NSSound(named: "Tink")?.play() }
+        case .capture, .copy, .scroll:
+            recordAndCopy(image)
+            if preferences.saveAfterCapture {
+                _ = try? ImageExporter.save(image, to: preferences.saveDirectory, preferences: preferences)
+            }
+        case .save:
+            recordAndCopy(image)
+            do {
+                _ = try ImageExporter.save(image, to: preferences.saveDirectory, preferences: preferences)
+            } catch {
+                showSaveFailure(error)
+            }
         case .pin:
-            if preferences.historyEnabled { historyStore.add(image: image) }
+            recordAndCopy(image)
             PinWindowRegistry.shared.pin(image)
-            if preferences.playSound { NSSound(named: "Tink")?.play() }
         }
+    }
+
+    private func recordAndCopy(_ image: CGImage) {
+        if preferences.historyEnabled { historyStore.add(image: image) }
+        ImageExporter.copyToPasteboard(image)
+        if preferences.playSound { NSSound(named: "Tink")?.play() }
+    }
+
+    private func showSaveFailure(_ error: Error) {
+        let alert = NSAlert(error: error)
+        alert.messageText = "Screenshot Copied, but Save Failed"
+        alert.informativeText = "The screenshot is already in your clipboard. Choose another save folder in SnapSail Preferences and try again."
+        alert.runModal()
     }
 
     private func ensurePermission() -> Bool {

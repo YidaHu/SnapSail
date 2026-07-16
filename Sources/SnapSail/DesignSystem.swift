@@ -4,6 +4,8 @@ enum SnapSailStyle {
     static let accent = NSColor.systemBlue
     static let selectionFill = NSColor.systemBlue.withAlphaComponent(0.08)
     static let overlayDim = NSColor.black.withAlphaComponent(0.18)
+    static let captureToolbarBackground = NSColor(calibratedWhite: 0.985, alpha: 0.98)
+    static let captureToolbarForeground = NSColor(calibratedWhite: 0.22, alpha: 1)
     static let cardCornerRadius: CGFloat = 11
     static let controlHeight: CGFloat = 30
     static let space8: CGFloat = 8
@@ -17,6 +19,59 @@ enum SnapSailStyle {
         let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)?.withSymbolConfiguration(configuration)
         image?.isTemplate = true
         return image
+    }
+}
+
+final class CircularSymbolButton: NSButton {
+    private var tracking: NSTrackingArea?
+    private var hovered = false
+
+    init(symbol: String, toolTip: String, target: AnyObject?, action: Selector?) {
+        super.init(frame: CGRect(x: 0, y: 0, width: 46, height: 46))
+        image = SnapSailStyle.symbol(symbol, size: 23, weight: .semibold)
+        imagePosition = .imageOnly
+        isBordered = false
+        focusRingType = .none
+        self.toolTip = toolTip
+        self.target = target
+        self.action = action
+        wantsLayer = true
+        layer?.cornerRadius = 23
+        layer?.shadowColor = NSColor.black.cgColor
+        layer?.shadowOpacity = 0.22
+        layer?.shadowRadius = 8
+        layer?.shadowOffset = CGSize(width: 0, height: -3)
+        contentTintColor = SnapSailStyle.captureToolbarForeground
+        updateAppearance()
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(
+            rect: bounds,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        hovered = true
+        updateAppearance()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        hovered = false
+        updateAppearance()
+    }
+
+    private func updateAppearance() {
+        layer?.backgroundColor = (hovered ? NSColor(calibratedWhite: 0.92, alpha: 1) : .white).cgColor
     }
 }
 
@@ -40,7 +95,7 @@ final class MaterialCardView: NSVisualEffectView {
     required init?(coder: NSCoder) { nil }
 }
 
-final class SymbolButton: NSButton {
+class SymbolButton: NSButton {
     private let symbolName: String
     private var trackingAreaRef: NSTrackingArea?
     var isSelected = false { didSet { updateAppearance(hovered: false) } }
