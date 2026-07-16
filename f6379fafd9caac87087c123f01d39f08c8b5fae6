@@ -1,0 +1,36 @@
+Sources/SnapSail/CaptureCoordinator.swift
+  manual_repair_20260716T151327Z 105,130
+Tests/SnapSailCoreTests/SelectionOverlaySafetyTests.swift
+  manual_repair_20260716T151327Z 5-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "f6379fafd9caac87087c123f01d39f08c8b5fae6",
+  "prompts": {
+    "manual_repair_20260716T151327Z": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "manual_repair_20260716T151327Z",
+        "model": "gpt-5.4"
+      },
+      "human_author": "YidaHu",
+      "messages": [
+        {
+          "type": "user",
+          "timestamp": "2026-07-16T15:13:27Z",
+          "text": "用户要求修复截图后全局窗口发灰且无法点击的问题，并将修复代码推送到远端。"
+        },
+        {
+          "type": "assistant",
+          "timestamp": "2026-07-16T15:13:27Z",
+          "text": "Prevent reentrant screenshot requests from orphaning full-screen overlay windows and add regression coverage."
+        }
+      ],
+      "total_additions": 24,
+      "total_deletions": 0,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    }
+  }
+}
