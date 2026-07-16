@@ -1,0 +1,21 @@
+docs/superpowers/plans/2026-07-16-launch-at-login.md
+  s_806fcff206d472::t_28ae4f3419805f 1-53
+docs/superpowers/specs/2026-07-16-launch-at-login-design.md
+  s_806fcff206d472::t_28ae4f3419805f 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "94889ed38614a2efac5d9d88b4fc437a63327ab3",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
