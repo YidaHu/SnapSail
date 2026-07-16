@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SnapSail — X Social Cards</title>
+  <style>
+    :root {
+      --blue: #0878ff;
+      --blue-bright: #168cff;
+      --blue-pale: #dcecff;
+      --ink: #0b1118;
+      --paper: #f3f4ee;
+      --paper-clean: #fbfcf8;
+      --muted: #66717b;
+      --line: rgba(11, 17, 24, 0.15);
+      --card-width: 1600px;
+      --card-height: 900px;
+      --serif: "Iowan Old Style", "Palatino Linotype", Baskerville, Georgia, serif;
+      --sans: "Avenir Next", Avenir, "Helvetica Neue", sans-serif;
+      --mono: "SFMono-Regular", Menlo, Monaco, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: #080b10; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(8, 120, 255, 0.16), transparent 26rem),
+        #080b10;
+      color: white;
+      font-family: var(--sans);
+      min-height: 100vh;
+    }
+
+    button { font: inherit; }
+
+    .topbar {
+      align-items: center;
+      backdrop-filter: blur(22px);
+      background: rgba(8, 11, 16, 0.82);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 22px;
+      height: 76px;
+      justify-content: space-between;
+      left: 0;
+      padding: 0 28px;
+      position: sticky;
+      right: 0;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-brand,
+    .topbar-actions,
+    .card-jump { align-items: center; display: flex; }
+
+    .topbar-brand { gap: 12px; }
+    .topbar-brand strong { font-size: 14px; letter-spacing: -0.02em; }
+    .topbar-brand span { color: #7f8b97; font: 700 10px var(--mono); letter-spacing: 0.12em; }
+    .topbar-actions { gap: 9px; }
+    .card-jump { gap: 7px; }
+
+    .topbar button {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      color: #c6ced6;
+      cursor: pointer;
+      height: 38px;
+      min-width: 38px;
+      padding: 0 14px;
+      transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .topbar button:hover { background: rgba(255,255,255,0.12); color: white; transform: translateY(-1px); }
+    .topbar button.is-active { background: var(--blue); border-color: var(--blue); color: white; }
+    .topbar button:focus-visible { outline: 3px solid rgba(22, 140, 255, 0.55); outline-offset: 2px; }
+
+    .gallery {
+      display: grid;
+      gap: 96px;
+      justify-items: center;
+      padding: 68px 40px 130px;
+    }
+
+    .card-shell {
+      height: calc(900px * var(--scale, 1));
+      position: relative;
+      width: min(1600px, calc(100vw - 80px));
+    }
+
+    .artboard {
+      height: var(--card-height);
+      left: 0;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      transform: scale(var(--scale, 1));
+      transform-origin: top left;
+      width: var(--card-width);
+    }
+
+    .card-shell::after {
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 40px 120px rgba(0,0,0,0.46);
+      content: "";
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .brand {
+      align-items: center;
+      display: flex;
+      gap: 16px;
+      position: absolute;
+      z-index: 8;
+    }
+
+    .brand-mark,
+    .topbar-mark {
+      align-items: center;
+      background: var(--ink);
+      border-radius: 13px;
+      color: white;
+      display: flex;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      justify-content: center;
+    }
+
+    .brand-mark { font-size: 26px; height: 48px; width: 48px; }
+    .topbar-mark { background: var(--blue); border-radius: 9px; font-size: 17px; height: 32px; width: 32px; }
+    .brand-name { color: inherit; font-size: 19px; font-weight: 700; letter-spacing: -0.035em; }
+    .brand-note { color: #7c8791; display: block; font: 700 9px var(--mono); letter-spacing: 0.13em; margin-top: 4px; }
+
+    .card-index {
+      font: 700 10px var(--mono);
+      letter-spacing: 0.15em;
+      position: absolute;
+      right: 72px;
+      top: 70px;
+      z-index: 8;
+    }
+
+    .card-index span { color: var(--blue); margin-right: 11px; }
+
+    .grid-paper {
+      background-image:
+        linear-gradient(rgba(11, 17, 24, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11, 17, 24, 0.045) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .eyebrow {
+      align-items: center;
+      display: flex;
+      font: 800 11px var(--mono);
+      gap: 14px;
+      letter-spacing: 0.15em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before { background: var(--blue); border-radius: 50%; box-shadow: 0 0 0 7px rgba(8,120,255,0.11); content: ""; height: 8px; width: 8px; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tag {
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font: 750 10px var(--mono);
+      letter-spacing: 0.09em;
+      padding: 11px 15px;
+      text-transform: uppercase;
+    }
+
+    /* Card 1 — point of view */
+    .card-one { background: var(--paper); color: var(--ink); }
+    .card-one::before {
+      background: var(--blue);
+      content: "";
+      height: 13px;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    .card-one .brand { left: 72px; top: 64px; }
+    .card-one .c1-copy { left: 72px; position: absolute; top: 184px; width: 760px; z-index: 7; }
+    .card-one .eyebrow { color: #69747e; }
+    .card-one h1 {
+      font-family: var(--serif);
+      font-size: 100px;
+      font-weight: 500;
+      letter-spacing: -0.075em;
+      line-height: 0.89;
+      margin: 39px 0 33px;
+      max-width: 760px;
+    }
+
+    .card-one h1 em { color: var(--blue); display: block; font-weight: 500; padding-left: 45px; }
+    .card-one .lead { color: #5f6b76; font-size: 22px; line-height: 1.62; margin: 0; max-width: 585px; }
+    .card-one .tag-row { margin-top: 35px; }
+    .card-one .tag { color: #53606b; }
+
+    .c1-stage {
+      background:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+        #11171e;
+      background-size: 36px 36px;
+      border-radius: 30px 0 0 30px;
+      bottom: 0;
+      box-shadow: -34px 32px 86px rgba(16, 26, 35, 0.23);
+      height: 690px;
+      overflow: hidden;
+      position: absolute;
+      right: 0;
+      width: 690px;
+    }
+
+    .c1-window {
+      background: #edf0eb;
+      border-radius: 15px;
+      height: 430px;
+      left: 70px;
+      overflow: hidden;
+      position: absolute;
+      top: 88px;
+      width: 520px;
+    }
+
+    .window-bar {
+      align-items: center;
+      background: #fbfcf8;
+      border-bottom: 1px solid #d9ddd8;
+      display: flex;
+      height: 42px;
+      padding: 0 16px;
+    }
+
+    .traffic { display: flex; gap: 7px; }
+    .traffic i { background: #cbd0cb; border-radius: 50%; height: 9px; width: 9px; }
+    .window-title { color: #9aa19b; font: 700 8px var(--mono); letter-spacing: 0.12em; margin-left: auto; }
+    .window-layout { display: grid; grid-template-columns: 95px 1fr; height: calc(100% - 42px); }
+    .window-side { background: #dfe4de; padding: 32px 19px; }
+    .window-side b { background: #bcc5bd; border-radius: 99px; display: block; height: 7px; margin: 0 0 22px; width: 48px; }
+    .window-side b:first-child { background: var(--ink); border-radius: 12px; height: 44px; width: 44px; }
+    .window-main { padding: 48px 42px; }
+    .window-main small { color: #8b948d; font: 800 8px var(--mono); letter-spacing: 0.15em; }
+    .window-main h3 { font-family: var(--serif); font-size: 42px; font-weight: 500; letter-spacing: -0.05em; line-height: 0.98; margin: 18px 0 33px; }
+    .mock-cards { display: grid; gap: 10px; grid-template-columns: 1.25fr 1fr 0.8fr; }
+    .mock-cards i { background: #d3d9d3; border-radius: 8px; height: 86px; }
+    .mock-cards i:first-child { background: #bcd8f8; }
+
+    .c1-shade { background: rgba(6, 9, 13, 0.68); inset: 0; position: absolute; }
+    .selection-box {
+      border: 3px solid var(--blue-bright);
+      box-shadow: 0 0 35px rgba(8,120,255,0.72), inset 0 0 0 1px rgba(255,255,255,0.27);
+      height: 310px;
+      left: 120px;
+      position: absolute;
+      top: 146px;
+      width: 470px;
+    }
+
+    .selection-box::before {
+      background: var(--blue);
+      border-radius: 7px;
+      color: white;
+      content: "824 × 516  pt";
+      font: 750 12px var(--mono);
+      left: -3px;
+      letter-spacing: 0.03em;
+      padding: 11px 14px;
+      position: absolute;
+      top: -45px;
+    }
+
+    .selection-box i { border-color: var(--blue); border-style: solid; height: 26px; position: absolute; width: 26px; }
+    .selection-box i:nth-child(1) { border-width: 5px 0 0 5px; left: -7px; top: -7px; }
+    .selection-box i:nth-child(2) { border-width: 5px 5px 0 0; right: -7px; top: -7px; }
+    .selection-box i:nth-child(3) { border-width: 0 0 5px 5px; bottom: -7px; left: -7px; }
+    .selection-box i:nth-child(4) { border-width: 0 5px 5px 0; bottom: -7px; right: -7px; }
+
+    .mini-toolbar {
+      align-items: center;
+      background: white;
+      border-radius: 19px;
+      bottom: 96px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+      display: flex;
+      gap: 5px;
+      left: 90px;
+      padding: 8px 10px;
+      position: absolute;
+    }
+
+    .mini-toolbar span,
+    .mini-toolbar b {
+      align-items: center;
+      border-radius: 10px;
+      color: #313b44;
+      display: flex;
+      font-size: 19px;
+      font-weight: 500;
+      height: 40px;
+      justify-content: center;
+      width: 40px;
+    }
+
+    .mini-toolbar span:first-child { background: #e5f0ff; color: var(--blue); }
+    .mini-toolbar span.danger { color: #e22835; font-size: 26px; }
+    .mini-toolbar b { background: var(--blue); color: white; }
+    .mini-toolbar i { background: #d9dddf; height: 25px; margin: 0 2px; width: 1px; }
+
+    .c1-footnote {
+      bottom: 35px;
+      color: #8a949d;
+      font: 700 9px var(--mono);
+      left: 72px;
+      letter-spacing: 0.12em;
+      position: absolute;
+    }
+
+    /* Card 2 — workflow */
+    .card-two { background: #f9faf6; color: var(--ink); }
+    .card-two::after {
+      background: var(--blue);
+      content: "";
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 19px;
+    }
+
+    .card-two .brand { left: 72px; top: 61px; }
+    .card-two .card-index { color: #69747d; }
+    .c2-head { left: 72px; position: absolute; top: 160px; width: 1456px; }
+    .c2-head h2 {
+      font-family: var(--serif);
+      font-size: 86px;
+      font-weight: 500;
+      letter-spacing: -0.07em;
+      line-height: 0.95;
+      margin: 0;
+    }
+    .c2-head h2 em { color: var(--blue); font-weight: 500; }
+    .c2-head p { color: #6b7680; font-size: 20px; line-height: 1.55; margin: 24px 0 0; max-width: 680px; }
+    .c2-shortcut {
+      align-items: center;
+      background: var(--ink);
+      border-radius: 18px;
+      color: white;
+      display: flex;
+      gap: 16px;
+      padding: 17px 20px;
+      position: absolute;
+      right: 0;
+      top: 9px;
+    }
+    .c2-shortcut kbd { background: #222b34; border: 1px solid #3b4650; border-bottom-width: 4px; border-radius: 9px; font: 700 15px var(--mono); padding: 11px 13px 8px; }
+    .c2-shortcut span { color: #9ba7b1; font: 700 9px var(--mono); letter-spacing: 0.12em; margin-left: 7px; }
+
+    .workflow {
+      bottom: 76px;
+      display: grid;
+      gap: 0;
+      grid-template-columns: repeat(4, 1fr);
+      left: 72px;
+      position: absolute;
+      width: 1456px;
+    }
+
+    .workflow::before { background: #cfd5d0; content: ""; height: 1px; left: 50px; position: absolute; right: 50px; top: 34px; }
+    .flow-step { border-left: 1px solid #d9ddd9; min-height: 393px; padding: 0 26px; position: relative; }
+    .flow-step:last-child { border-right: 1px solid #d9ddd9; }
+    .step-dot {
+      align-items: center;
+      background: var(--paper-clean);
+      border: 2px solid #c8cfca;
+      border-radius: 50%;
+      color: #7f8982;
+      display: flex;
+      font: 800 10px var(--mono);
+      height: 69px;
+      justify-content: center;
+      position: relative;
+      width: 69px;
+      z-index: 2;
+    }
+    .flow-step:first-child .step-dot,
+    .flow-step:last-child .step-dot { background: var(--blue); border-color: var(--blue); color: white; box-shadow: 0 0 0 9px rgba(8,120,255,0.1); }
+    .step-visual { height: 164px; margin-top: 33px; position: relative; }
+    .flow-step h3 { font-family: var(--serif); font-size: 36px; font-weight: 500; letter-spacing: -0.045em; margin: 21px 0 9px; }
+    .flow-step p { color: #748079; font-size: 14px; line-height: 1.58; margin: 0; max-width: 255px; }
+    .key-stack { display: flex; gap: 8px; padding-top: 32px; }
+    .key-stack b { align-items: center; background: white; border: 1px solid #cbd1cc; border-bottom: 5px solid #b8c0ba; border-radius: 12px; display: flex; font: 750 23px var(--mono); height: 76px; justify-content: center; width: 76px; }
+    .crop-demo { background: #e2e6e1; border-radius: 10px; height: 135px; left: 14px; position: absolute; top: 12px; width: 235px; }
+    .crop-demo::before { border: 3px solid var(--blue); content: ""; height: 83px; left: 38px; position: absolute; top: 26px; width: 150px; }
+    .crop-demo::after { background: var(--blue); border-radius: 4px; color: white; content: "824 × 516"; font: 700 7px var(--mono); left: 38px; padding: 6px 8px; position: absolute; top: 6px; }
+    .annotate-demo { background: white; border: 1px solid #d6dbd7; border-radius: 13px; box-shadow: 0 14px 32px rgba(11,17,24,0.09); height: 135px; left: 11px; position: absolute; top: 12px; transform: rotate(-2deg); width: 238px; }
+    .annotate-demo::before { border: 4px solid #ff453a; border-radius: 8px; content: ""; height: 52px; left: 37px; position: absolute; top: 40px; width: 120px; }
+    .annotate-demo::after { color: #ff453a; content: "↗"; font-size: 58px; position: absolute; right: 20px; top: 16px; transform: rotate(-14deg); }
+    .pin-demo { background: #edf1ec; border: 8px solid white; border-radius: 12px; box-shadow: 16px 19px 38px rgba(11,17,24,0.2); height: 132px; left: 22px; overflow: hidden; position: absolute; top: 9px; transform: rotate(3deg); width: 220px; }
+    .pin-demo::before { background: linear-gradient(135deg, #c2dcfa 0 45%, #d6ddd7 45%); content: ""; inset: 0; position: absolute; }
+    .pin-demo::after { align-items: center; background: white; border-radius: 50%; box-shadow: 0 6px 14px rgba(0,0,0,0.2); content: "⌖"; display: flex; font-size: 19px; height: 37px; justify-content: center; position: absolute; right: 9px; top: 8px; width: 37px; }
+
+    /* Card 3 — privacy */
+    .card-three {
+      background:
+        radial-gradient(circle at 79% 44%, rgba(8,120,255,0.2), transparent 26%),
+        #0b1118;
+      color: white;
+    }
+    .card-three::before {
+      background-image: radial-gradient(rgba(255,255,255,0.18) 0.8px, transparent 0.8px);
+      background-size: 18px 18px;
+      content: "";
+      inset: 0;
+      opacity: 0.26;
+      position: absolute;
+    }
+    .card-three .brand { left: 72px; top: 64px; }
+    .card-three .brand-mark { background: white; color: var(--ink); }
+    .card-three .brand-note { color: #81909d; }
+    .card-three .card-index { color: #83909c; }
+    .c3-copy { left: 72px; position: absolute; top: 193px; width: 710px; z-index: 5; }
+    .c3-copy .eyebrow { color: #91a0ad; }
+    .c3-copy h2 { font-family: var(--serif); font-size: 96px; font-weight: 500; letter-spacing: -0.075em; line-height: 0.9; margin: 42px 0 31px; }
+    .c3-copy h2 em { color: #4da1ff; display: block; font-weight: 500; padding-left: 62px; }
+    .c3-copy > p:last-of-type { color: #93a0ac; font-size: 20px; line-height: 1.65; margin: 0; max-width: 570px; }
+    .privacy-facts { display: grid; gap: 0; grid-template-columns: repeat(3, 1fr); margin-top: 44px; width: 600px; }
+    .privacy-facts div { border-left: 1px solid rgba(255,255,255,0.17); padding-left: 18px; }
+    .privacy-facts strong { display: block; font-family: var(--serif); font-size: 27px; font-weight: 500; letter-spacing: -0.035em; }
+    .privacy-facts span { color: #778591; display: block; font: 750 8px var(--mono); letter-spacing: 0.12em; margin-top: 7px; text-transform: uppercase; }
+
+    .local-orbit { height: 610px; position: absolute; right: 53px; top: 163px; width: 690px; }
+    .orbit-ring { border: 1px solid rgba(77,161,255,0.31); border-radius: 50%; left: 50%; position: absolute; top: 50%; transform: translate(-50%,-50%); }
+    .orbit-ring.one { height: 610px; width: 610px; }
+    .orbit-ring.two { border-color: rgba(77,161,255,0.18); height: 480px; width: 480px; }
+    .orbit-ring.three { border-color: rgba(255,255,255,0.1); height: 360px; width: 360px; }
+    .orbit-ring::after { background: var(--blue); border-radius: 50%; box-shadow: 0 0 22px var(--blue); content: ""; height: 9px; position: absolute; right: 47px; top: 109px; width: 9px; }
+    .orbit-ring.two::after { left: 30px; right: auto; top: 327px; }
+    .orbit-ring.three::after { bottom: -5px; left: 50%; right: auto; top: auto; }
+    .local-window {
+      background: #edf0eb;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 22px;
+      box-shadow: 0 43px 100px rgba(0,0,0,0.47), 0 0 0 1px rgba(77,161,255,0.17);
+      height: 380px;
+      left: 110px;
+      overflow: hidden;
+      position: absolute;
+      top: 113px;
+      transform: rotate(1.4deg);
+      width: 500px;
+    }
+    .local-window .window-layout { grid-template-columns: 92px 1fr; }
+    .local-window .window-main { color: var(--ink); padding: 46px 42px; }
+    .privacy-lock { align-items: center; background: var(--blue); border-radius: 50%; box-shadow: 0 15px 38px rgba(8,120,255,0.45); color: white; display: flex; font-size: 40px; height: 94px; justify-content: center; position: absolute; right: 12px; top: 52px; transform: rotate(-1.4deg); width: 94px; }
+    .file-lines { display: grid; gap: 15px; margin-top: 9px; }
+    .file-lines span { align-items: center; background: #dde2dd; border-radius: 8px; color: #7d8780; display: flex; font: 700 8px var(--mono); height: 45px; letter-spacing: 0.08em; padding: 0 14px; }
+    .file-lines span::before { background: white; border-radius: 5px; content: ""; height: 23px; margin-right: 13px; width: 23px; }
+    .local-label { bottom: 18px; color: #579fe9; font: 750 9px var(--mono); left: 50%; letter-spacing: 0.15em; position: absolute; transform: translateX(-50%); white-space: nowrap; }
+    .privacy-rail { align-items: center; background: var(--blue); bottom: 0; display: flex; height: 76px; justify-content: space-between; left: 0; padding: 0 72px; position: absolute; right: 0; }
+    .privacy-rail span { font: 750 10px var(--mono); letter-spacing: 0.14em; }
+
+    /* Card 4 — overview */
+    .card-four { background: var(--paper-clean); color: var(--ink); }
+    .c4-blue { background: var(--blue); bottom: 0; color: white; left: 0; padding: 64px 70px; position: absolute; top: 0; width: 620px; }
+    .c4-blue .brand { left: 70px; top: 62px; }
+    .c4-blue .brand-mark { background: white; color: var(--blue); }
+    .c4-blue .brand-note { color: rgba(255,255,255,0.64); }
+    .c4-blue h2 { font-family: var(--serif); font-size: 85px; font-weight: 500; letter-spacing: -0.072em; line-height: 0.9; margin: 193px 0 31px; }
+    .c4-blue h2 em { display: block; font-weight: 500; padding-left: 34px; }
+    .c4-blue > p { color: rgba(255,255,255,0.77); font-size: 18px; line-height: 1.65; margin: 0; max-width: 430px; }
+    .repo-pill { align-items: center; background: var(--ink); border-radius: 17px; bottom: 62px; display: flex; left: 70px; padding: 18px 21px; position: absolute; width: 470px; }
+    .repo-pill > b { align-items: center; background: white; border-radius: 11px; color: var(--ink); display: flex; font-family: var(--serif); font-size: 21px; font-style: italic; height: 43px; justify-content: center; margin-right: 14px; width: 43px; }
+    .repo-pill strong { display: block; font-size: 13px; }
+    .repo-pill small { color: #89949f; display: block; font: 700 8px var(--mono); letter-spacing: 0.1em; margin-top: 5px; }
+    .repo-pill > span { color: #6fb1ff; font-size: 24px; margin-left: auto; }
+    .c4-canvas { bottom: 0; left: 620px; overflow: hidden; position: absolute; right: 0; top: 0; }
+    .c4-canvas::before {
+      background-image:
+        linear-gradient(rgba(11,17,24,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11,17,24,0.045) 1px, transparent 1px);
+      background-size: 38px 38px;
+      content: "";
+      inset: 0;
+      position: absolute;
+    }
+    .c4-canvas .card-index { color: #727d87; right: 70px; top: 70px; }
+    .feature-heading { left: 77px; position: absolute; top: 69px; }
+    .feature-heading p { color: var(--blue); font: 800 10px var(--mono); letter-spacing: 0.14em; margin: 0 0 13px; }
+    .feature-heading h3 { font-family: var(--serif); font-size: 46px; font-weight: 500; letter-spacing: -0.05em; margin: 0; }
+    .feature-stack { height: 655px; left: 63px; position: absolute; top: 176px; width: 850px; }
+    .feature-card { background: #eef1ec; border: 1px solid #d6dbd6; border-radius: 17px; box-shadow: 0 25px 60px rgba(11,17,24,0.13); overflow: hidden; position: absolute; }
+    .feature-card::before { align-items: center; background: white; border-bottom: 1px solid #dce0dc; color: #7c8780; content: attr(data-label); display: flex; font: 750 8px var(--mono); height: 35px; letter-spacing: 0.13em; padding-left: 15px; }
+    .feature-card.area { height: 310px; left: 0; top: 0; transform: rotate(-2deg); width: 430px; z-index: 3; }
+    .feature-card.scroll { height: 520px; right: 0; top: 23px; transform: rotate(2deg); width: 280px; z-index: 4; }
+    .feature-card.annotate { bottom: 11px; height: 290px; left: 104px; transform: rotate(1.5deg); width: 450px; z-index: 5; }
+    .area-canvas { background: #dfe4df; height: calc(100% - 35px); position: relative; }
+    .area-canvas::before { background: #c7d4c8; border-radius: 8px; content: ""; height: 95px; left: 45px; position: absolute; top: 54px; width: 315px; }
+    .area-canvas::after { border: 3px solid var(--blue); box-shadow: 0 0 18px rgba(8,120,255,0.3); content: ""; height: 145px; left: 75px; position: absolute; top: 34px; width: 270px; }
+    .scroll-body { display: grid; gap: 8px; padding: 15px; }
+    .scroll-body i { background: #d6dcd6; border-radius: 6px; height: 82px; }
+    .scroll-body i:nth-child(2), .scroll-body i:nth-child(5) { background: #bfdafa; }
+    .annotation-body { height: calc(100% - 35px); position: relative; }
+    .annotation-body::before { border: 4px solid #ff453a; border-radius: 10px; content: ""; height: 96px; left: 60px; position: absolute; top: 52px; width: 190px; }
+    .annotation-body::after { color: #ff453a; content: "↗"; font-size: 82px; position: absolute; right: 53px; top: 30px; transform: rotate(-12deg); }
+    .annotation-toolbar { align-items: center; background: white; border-radius: 13px; bottom: 17px; box-shadow: 0 13px 32px rgba(11,17,24,0.17); display: flex; gap: 7px; left: 55px; padding: 7px; position: absolute; }
+    .annotation-toolbar span { align-items: center; border-radius: 7px; display: flex; font-size: 15px; height: 31px; justify-content: center; width: 31px; }
+    .annotation-toolbar span:first-child { background: #e4effd; color: var(--blue); }
+    .annotation-toolbar span:last-child { background: var(--blue); color: white; }
+    .feature-tags { bottom: 51px; display: flex; gap: 9px; left: 72px; position: absolute; }
+    .feature-tags span { background: white; border: 1px solid #d4d9d4; border-radius: 999px; color: #65716a; font: 750 8px var(--mono); letter-spacing: 0.09em; padding: 10px 13px; }
+
+    .focus-mode .topbar { opacity: 0; pointer-events: none; position: fixed; transition: opacity 160ms ease; }
+    .focus-mode .topbar:hover { opacity: 1; pointer-events: auto; }
+    .focus-mode .gallery { min-height: 100vh; padding: 0; }
+    .focus-mode .card-shell:not(.is-active) { display: none; }
+    .focus-mode .card-shell { margin: auto; }
+
+    .capture { background: transparent; height: 900px; min-height: 900px; overflow: hidden; width: 1600px; }
+    .capture .topbar { display: none; }
+    .capture .gallery { display: block; height: 900px; padding: 0; width: 1600px; }
+    .capture .card-shell { display: none; height: 900px; width: 1600px; }
+    .capture .card-shell.is-active { display: block; }
+    .capture .card-shell::after { display: none; }
+    .capture .artboard { transform: none !important; }
+    .capture * { animation: none !important; transition: none !important; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      body:not(.capture) .card-shell { opacity: 0; transform: translateY(28px); animation: reveal 600ms cubic-bezier(.2,.8,.2,1) forwards; }
+      body:not(.capture) .card-shell:nth-child(2) { animation-delay: 90ms; }
+      body:not(.capture) .card-shell:nth-child(3) { animation-delay: 180ms; }
+      body:not(.capture) .card-shell:nth-child(4) { animation-delay: 270ms; }
+      @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar" aria-label="Card controls">
+    <div class="topbar-brand">
+      <div class="topbar-mark">S</div>
+      <div><strong>SnapSail / X Cards</strong><span>1600 × 900 · SCREENSHOT READY</span></div>
+    </div>
+    <nav class="card-jump" aria-label="Choose card">
+      <button class="jump is-active" data-go="1" type="button">01</button>
+      <button class="jump" data-go="2" type="button">02</button>
+      <button class="jump" data-go="3" type="button">03</button>
+      <button class="jump" data-go="4" type="button">04</button>
+    </nav>
+    <div class="topbar-actions">
+      <button id="previous" type="button" aria-label="Previous card">←</button>
+      <button id="next" type="button" aria-label="Next card">→</button>
+      <button id="focus" type="button">Focus · F</button>
+    </div>
+  </header>
+
+  <main class="gallery">
+    <section class="card-shell is-active" data-shell="1">
+      <article class="artboard card-one grid-paper" data-card="1" data-size="1600x900">
+        <div class="brand"><div class="brand-mark">S</div><div><span class="brand-name">SnapSail</span><span class="brand-note">NATIVE SCREENSHOT WORKSPACE</span></div></div>
+        <div class="card-index"><span>01</span>POINT OF VIEW</div>
+        <div class="c1-copy">
+          <p class="eyebrow">A tiny utility for a daily habit</p>
+          <h1>Screenshot apps shouldn’t be <em>subscriptions.</em></h1>
+          <p class="lead">Capture, annotate, pin or copy—then get back to what you were doing.</p>
+          <div class="tag-row"><span class="tag">Native macOS</span><span class="tag">Local first</span><span class="tag">Free + open source</span></div>
+        </div>
+        <div class="c1-stage">
+          <div class="c1-window">
+            <div class="window-bar"><div class="traffic"><i></i><i></i><i></i></div><span class="window-title">DESIGN REVIEW / 09:41</span></div>
+            <div class="window-layout"><div class="window-side"><b></b><b></b><b></b><b></b></div><div class="window-main"><small>CAPTURE / 024</small><h3>Ship the detail<br>people can feel.</h3><div class="mock-cards"><i></i><i></i><i></i></div></div></div>
+          </div>
+          <div class="c1-shade"></div>
+          <div class="selection-box"><i></i><i></i><i></i><i></i></div>
+          <div class="mini-toolbar"><span>□</span><span>○</span><span>↗</span><span>✎</span><span>▦</span><span>A</span><i></i><span>↶</span><span class="danger">×</span><i></i><span>⇩</span><b>✓</b></div>
+        </div>
+        <div class="c1-footnote">SWIFT + APPKIT · MACOS 12+ · MIT LICENSE</div>
+      </article>
+    </section>
+
+    <section class="card-shell" data-shell="2">
+      <article class="artboard card-two grid-paper" data-card="2" data-size="1600x900">
+        <div class="brand"><div class="brand-mark">S</div><div><span class="brand-name">SnapSail</span><span class="brand-note">BUILT FOR THE THING YOU DO ALL DAY</span></div></div>
+        <div class="card-index"><span>02</span>DAILY WORKFLOW</div>
+        <div class="c2-head">
+          <h2>Capture. Annotate. Pin. <em>Move on.</em></h2>
+          <p>The shortest screenshot workflow is the one that never asks you to leave the moment.</p>
+          <div class="c2-shortcut"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>2</kbd><span>READY IN ONE SHORTCUT</span></div>
+        </div>
+        <div class="workflow">
+          <article class="flow-step"><div class="step-dot">01</div><div class="step-visual"><div class="key-stack"><b>⌘</b><b>⇧</b><b>2</b></div></div><h3>Trigger</h3><p>Start a precise area capture without leaving the keyboard.</p></article>
+          <article class="flow-step"><div class="step-dot">02</div><div class="step-visual"><div class="crop-demo"></div></div><h3>Shape</h3><p>Drag, move, resize and nudge the selection across displays.</p></article>
+          <article class="flow-step"><div class="step-dot">03</div><div class="step-visual"><div class="annotate-demo"></div></div><h3>Mark</h3><p>Add an arrow, text, highlight or true pixel-based mosaic.</p></article>
+          <article class="flow-step"><div class="step-dot">04</div><div class="step-visual"><div class="pin-demo"></div></div><h3>Keep moving</h3><p>Copy, save or pin the result—and return to your work.</p></article>
+        </div>
+      </article>
+    </section>
+
+    <section class="card-shell" data-shell="3">
+      <article class="artboard card-three" data-card="3" data-size="1600x900">
+        <div class="brand"><div class="brand-mark">S</div><div><span class="brand-name">SnapSail</span><span class="brand-note">LOCAL-FIRST BY DEFAULT</span></div></div>
+        <div class="card-index"><span>03</span>PRIVACY</div>
+        <div class="c3-copy">
+          <p class="eyebrow">Your screen is not a data source</p>
+          <h2>Your screenshots stay on <em>your Mac.</em></h2>
+          <p>No account. No analytics upload. No backend between you and the pixels you just captured.</p>
+          <div class="privacy-facts"><div><strong>No account</strong><span>Nothing to sign into</span></div><div><strong>No upload</strong><span>Pixels stay local</span></div><div><strong>20 items</strong><span>Bounded local history</span></div></div>
+        </div>
+        <div class="local-orbit">
+          <div class="orbit-ring one"></div><div class="orbit-ring two"></div><div class="orbit-ring three"></div>
+          <div class="local-window">
+            <div class="window-bar"><div class="traffic"><i></i><i></i><i></i></div><span class="window-title">SNAPSAIL / LOCAL HISTORY</span></div>
+            <div class="window-layout"><div class="window-side"><b></b><b></b><b></b><b></b></div><div class="window-main"><small>ON THIS MAC</small><div class="file-lines"><span>Capture · 09:41</span><span>Design review · 09:32</span><span>Receipt · 08:57</span></div></div></div>
+            <div class="privacy-lock">⌑</div>
+          </div>
+          <div class="local-label">~/LIBRARY/APPLICATION SUPPORT/SNAPSAIL</div>
+        </div>
+        <div class="privacy-rail"><span>LOCAL PROCESSING</span><span>NO THIRD-PARTY RUNTIME DEPENDENCIES</span><span>MIT LICENSE</span><span>中 / EN</span></div>
+      </article>
+    </section>
+
+    <section class="card-shell" data-shell="4">
+      <article class="artboard card-four" data-card="4" data-size="1600x900">
+        <div class="c4-blue">
+          <div class="brand"><div class="brand-mark">S</div><div><span class="brand-name">SnapSail</span><span class="brand-note">CAPTURE WHAT MATTERS</span></div></div>
+          <h2>Free.<br>Open source.<em>Everyday.</em></h2>
+          <p>A native macOS screenshot workspace made for the small task you repeat more than you notice.</p>
+          <div class="repo-pill"><b>S</b><div><strong>YidaHu / SnapSail</strong><small>SWIFT · APPKIT · MIT</small></div><span>↗</span></div>
+        </div>
+        <div class="c4-canvas">
+          <div class="feature-heading"><p>ONE LIGHTWEIGHT WORKSPACE</p><h3>Four ways to finish a capture.</h3></div>
+          <div class="card-index"><span>04</span>OPEN SOURCE</div>
+          <div class="feature-stack">
+            <div class="feature-card area" data-label="AREA CAPTURE"><div class="area-canvas"></div></div>
+            <div class="feature-card scroll" data-label="SCROLLING CAPTURE"><div class="scroll-body"><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="feature-card annotate" data-label="INLINE ANNOTATION"><div class="annotation-body"><div class="annotation-toolbar"><span>□</span><span>○</span><span>↗</span><span>✎</span><span>A</span><span>✓</span></div></div></div>
+          </div>
+          <div class="feature-tags"><span>AREA + WINDOW</span><span>SCROLL STITCHING</span><span>ANNOTATE</span><span>PIN ON SCREEN</span><span>中 / EN</span></div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const body = document.body;
+    const shells = [...document.querySelectorAll('[data-shell]')];
+    const jumps = [...document.querySelectorAll('[data-go]')];
+    const params = new URLSearchParams(location.search);
+    const captureMode = params.get('capture') === '1';
+    let active = Math.min(4, Math.max(1, Number(params.get('card')) || 1));
+
+    function resizeGallery() {
+      if (captureMode) return;
+      shells.forEach((shell) => {
+        const scale = Math.min(1, shell.clientWidth / 1600);
+        shell.style.setProperty('--scale', scale.toFixed(5));
+        shell.style.height = `${900 * scale}px`;
+      });
+    }
+
+    function setActive(next, shouldScroll = true) {
+      active = ((next - 1 + shells.length) % shells.length) + 1;
+      shells.forEach((shell) => shell.classList.toggle('is-active', Number(shell.dataset.shell) === active));
+      jumps.forEach((jump) => jump.classList.toggle('is-active', Number(jump.dataset.go) === active));
+      if (shouldScroll && !captureMode) {
+        shells[active - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    jumps.forEach((jump) => jump.addEventListener('click', () => setActive(Number(jump.dataset.go))));
+    document.querySelector('#previous').addEventListener('click', () => setActive(active - 1));
+    document.querySelector('#next').addEventListener('click', () => setActive(active + 1));
+    document.querySelector('#focus').addEventListener('click', () => body.classList.toggle('focus-mode'));
+
+    addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') setActive(active - 1);
+      if (event.key === 'ArrowRight') setActive(active + 1);
+      if (/^[1-4]$/.test(event.key)) setActive(Number(event.key));
+      if (event.key.toLowerCase() === 'f') body.classList.toggle('focus-mode');
+      if (event.key === 'Escape') body.classList.remove('focus-mode');
+    });
+
+    if (captureMode) body.classList.add('capture');
+    setActive(active, false);
+    resizeGallery();
+    addEventListener('resize', resizeGallery);
+  </script>
+</body>
+</html>
