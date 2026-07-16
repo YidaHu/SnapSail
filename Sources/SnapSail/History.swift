@@ -8,6 +8,7 @@ final class HistoryStore {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         directory = support.appendingPathComponent("SnapSail/History", isDirectory: true)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        trim(to: 20)
     }
 
     func add(image: CGImage) {
@@ -15,7 +16,7 @@ final class HistoryStore {
         let url = directory.appendingPathComponent(name)
         guard let data = ImageExporter.data(for: image, format: .png, quality: 1) else { return }
         try? data.write(to: url, options: .atomic)
-        trim(to: 200)
+        trim(to: 20)
     }
 
     func items() -> [URL] {

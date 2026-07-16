@@ -20,7 +20,7 @@ final class CaptureCoordinator {
             self.menuBar?.updateLanguage(shortcuts: self.preferences.shortcuts)
         }
     )
-    private lazy var historyStore = HistoryStore()
+    private let historyStore = HistoryStore()
     private lazy var historyController = HistoryWindowController(store: historyStore) { [weak self] image in
         self?.presentEditor(image)
     }
