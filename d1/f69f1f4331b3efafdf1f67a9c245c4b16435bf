@@ -1,0 +1,19 @@
+Sources/SnapSail/InlineAnnotationRenderer.swift
+  s_806fcff206d472::t_61044cd1042467 1-204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "d1f69f1f4331b3efafdf1f67a9c245c4b16435bf",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
