@@ -1,0 +1,26 @@
+social/snapsail-x-cards.html
+  s_98cc66d2452583::t_89aba9467c31be 1-701
+docs/superpowers/plans/2026-07-16-snapsail-x-social-cards.md
+  s_98cc66d2452583::t_ee00b51dc98cbd 18,22,26,30,51,55,65,75
+  s_98cc66d2452583::t_d3b7d0b30c1bc7 1-17,19-21,23-25,27-29,31-50,52-54,56-64,66-74,76-78,80-96
+  s_98cc66d2452583::t_d3ea4aaa3d90ce 79
+social/capture-cards.sh
+  s_98cc66d2452583::t_70ac1f680797d3 16
+  s_98cc66d2452583::t_89aba9467c31be 1-15,17-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9de2d7e8ae81f0470d5299a061aa40551e278526",
+  "prompts": {},
+  "sessions": {
+    "s_98cc66d2452583": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6b5e-0e82-78e3-a88f-31de3f33a79c",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
