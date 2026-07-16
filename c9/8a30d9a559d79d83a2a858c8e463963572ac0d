@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-16-capture-reliability-and-shadow-design.md
+  s_806fcff206d472::t_7358ce5d4b5446 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "c98a30d9a559d79d83a2a858c8e463963572ac0d",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
