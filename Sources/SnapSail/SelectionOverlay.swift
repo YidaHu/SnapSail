@@ -217,7 +217,9 @@ final class SelectionOverlayView: NSView {
     private var interaction: RegionInteraction = .idle
     private let toolbar = InlineCaptureToolbar(frame: CGRect(origin: .zero, size: InlineCaptureToolbar.preferredSize))
     private let pinButton = CircularSymbolButton(symbol: "pin.fill", toolTip: L10n.text(.pinOnScreen), target: nil, action: nil)
-    private let sizeLabel = MeasurementPillView(frame: CGRect(x: 0, y: 0, width: 238, height: 50))
+    private let sizeLabel = MeasurementPillView(
+        frame: CGRect(origin: .zero, size: MeasurementPillView.preferredSize)
+    )
     private let loupe = SelectionLoupeView(frame: CGRect(x: 0, y: 0, width: 120, height: 86))
     private var annotationHistory = InlineAnnotationHistory()
     private var annotationDraft: InlineAnnotation?
@@ -471,14 +473,16 @@ final class SelectionOverlayView: NSView {
 
         if controller?.selectionMode == .region {
             sizeLabel.setSize(target.size)
-            let labelWidth: CGFloat = 238
-            var labelY = target.maxY + 14
-            if labelY + 50 > bounds.maxY { labelY = target.maxY - 58 }
+            let labelSize = MeasurementPillView.preferredSize
+            var labelY = target.maxY + 10
+            if labelY + labelSize.height > bounds.maxY {
+                labelY = target.maxY - labelSize.height - 8
+            }
             sizeLabel.frame = CGRect(
-                x: min(max(8, target.midX - labelWidth / 2), bounds.maxX - labelWidth - 8),
+                x: min(max(8, target.midX - labelSize.width / 2), bounds.maxX - labelSize.width - 8),
                 y: labelY,
-                width: labelWidth,
-                height: 50
+                width: labelSize.width,
+                height: labelSize.height
             )
         }
 

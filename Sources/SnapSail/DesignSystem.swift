@@ -4,8 +4,8 @@ enum SnapSailStyle {
     static let accent = NSColor.systemBlue
     static let selectionFill = NSColor.systemBlue.withAlphaComponent(0.08)
     static let overlayDim = NSColor.black.withAlphaComponent(0.18)
-    static let captureToolbarSize = CGSize(width: 744, height: 62)
-    static let captureToolbarCornerRadius: CGFloat = 22
+    static let captureToolbarSize = CGSize(width: 660, height: 54)
+    static let captureToolbarCornerRadius: CGFloat = 19
     static let captureToolbarBackground = NSColor(calibratedWhite: 0.988, alpha: 0.985)
     static let captureToolbarForeground = NSColor(calibratedWhite: 0.20, alpha: 1)
     static let captureToolbarSelectionBackground = NSColor(
@@ -179,6 +179,8 @@ final class PillLabel: NSTextField {
 }
 
 final class MeasurementPillView: NSView {
+    static let preferredSize = CGSize(width: 164, height: 34)
+
     private let widthLabel = NSTextField(labelWithString: "0")
     private let lockView = NSImageView()
     private let heightLabel = NSTextField(labelWithString: "0")
@@ -188,28 +190,30 @@ final class MeasurementPillView: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
         layer?.backgroundColor = SnapSailStyle.accent.cgColor
-        layer?.cornerRadius = 7
+        layer?.cornerRadius = 6
         layer?.shadowColor = SnapSailStyle.accent.cgColor
-        layer?.shadowOpacity = 0.32
-        layer?.shadowRadius = 10
-        layer?.shadowOffset = CGSize(width: 0, height: -3)
+        layer?.shadowOpacity = 0.24
+        layer?.shadowRadius = 7
+        layer?.shadowOffset = CGSize(width: 0, height: -2)
 
         for label in [widthLabel, heightLabel] {
-            label.font = .monospacedDigitSystemFont(ofSize: 20, weight: .semibold)
+            label.font = .monospacedDigitSystemFont(ofSize: 14, weight: .semibold)
             label.textColor = .white
             label.alignment = .center
             addSubview(label)
         }
-        unitLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        unitLabel.font = .systemFont(ofSize: 10, weight: .medium)
         unitLabel.textColor = .white.withAlphaComponent(0.94)
         unitLabel.alignment = .left
         addSubview(unitLabel)
-        lockView.image = SnapSailStyle.symbol("lock.fill", size: 14, weight: .semibold)
+        lockView.image = SnapSailStyle.symbol("lock.fill", size: 10, weight: .semibold)
         lockView.contentTintColor = .white
         addSubview(lockView)
     }
 
     required init?(coder: NSCoder) { nil }
+
+    override var intrinsicContentSize: NSSize { Self.preferredSize }
 
     func setSize(_ size: CGSize) {
         widthLabel.stringValue = "\(Int(size.width))"
@@ -218,10 +222,10 @@ final class MeasurementPillView: NSView {
 
     override func layout() {
         super.layout()
-        widthLabel.frame = CGRect(x: 14, y: 11, width: 72, height: 28)
-        lockView.frame = CGRect(x: 91, y: 17, width: 16, height: 16)
-        heightLabel.frame = CGRect(x: 112, y: 11, width: 72, height: 28)
-        unitLabel.frame = CGRect(x: 190, y: 13, width: 38, height: 24)
+        widthLabel.frame = CGRect(x: 10, y: 7, width: 50, height: 20)
+        lockView.frame = CGRect(x: 64, y: 12, width: 10, height: 10)
+        heightLabel.frame = CGRect(x: 78, y: 7, width: 50, height: 20)
+        unitLabel.frame = CGRect(x: 134, y: 9, width: 22, height: 16)
     }
 }
 

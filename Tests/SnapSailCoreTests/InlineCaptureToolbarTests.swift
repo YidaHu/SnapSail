@@ -7,17 +7,17 @@ final class InlineCaptureToolbarTests: XCTestCase {
     func testUsesProductPageContainerMetrics() {
         let toolbar = makeToolbar()
 
-        XCTAssertEqual(InlineCaptureToolbar.preferredSize, CGSize(width: 744, height: 62))
-        XCTAssertEqual(toolbar.layer?.cornerRadius, 22)
+        XCTAssertEqual(InlineCaptureToolbar.preferredSize, CGSize(width: 660, height: 54))
+        XCTAssertEqual(toolbar.layer?.cornerRadius, 19)
     }
 
-    func testSpacesAnnotationButtonsWithFourPointGap() throws {
+    func testSpacesAnnotationButtonsWithThreePointGap() throws {
         let toolbar = makeToolbar()
         let rectangle = try button(tag: InlineAnnotationTool.rectangle.rawValue, in: toolbar)
         let ellipse = try button(tag: InlineAnnotationTool.ellipse.rawValue, in: toolbar)
 
-        XCTAssertEqual(ellipse.frame.minX - rectangle.frame.maxX, 4)
-        XCTAssertEqual(rectangle.frame.size, CGSize(width: 40, height: 42))
+        XCTAssertEqual(ellipse.frame.minX - rectangle.frame.maxX, 3)
+        XCTAssertEqual(rectangle.frame.size, CGSize(width: 36, height: 38))
     }
 
     func testUsesPaleBlueSelectionAndSolidBlueCompletion() throws {
@@ -75,7 +75,7 @@ final class InlineCaptureToolbarTests: XCTestCase {
 
         for (identifier, symbolName) in symbols {
             let actual = try XCTUnwrap(try button(identifier: identifier, in: toolbar).image)
-            let expected = try XCTUnwrap(SnapSailStyle.symbol(symbolName, size: 20, weight: .medium))
+            let expected = try XCTUnwrap(SnapSailStyle.symbol(symbolName, size: 18, weight: .medium))
             XCTAssertEqual(
                 actual.tiffRepresentation,
                 expected.tiffRepresentation,

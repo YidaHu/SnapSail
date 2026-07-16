@@ -5,13 +5,14 @@ final class InlineCaptureToolbar: NSView {
     static let preferredSize = SnapSailStyle.captureToolbarSize
 
     private enum Metrics {
-        static let outerPadding: CGFloat = 12
-        static let buttonWidth: CGFloat = 40
-        static let buttonHeight: CGFloat = 42
-        static let buttonGap: CGFloat = 4
-        static let separatorLeadingSpace: CGFloat = 6
+        static let outerPadding: CGFloat = 10
+        static let buttonWidth: CGFloat = 36
+        static let buttonHeight: CGFloat = 38
+        static let buttonGap: CGFloat = 3
+        static let separatorLeadingSpace: CGFloat = 5
         static let separatorWidth: CGFloat = 1
-        static let separatorTrailingSpace: CGFloat = 7
+        static let separatorTrailingSpace: CGFloat = 6
+        static let separatorHeight: CGFloat = 22
     }
 
     var onToolSelected: ((InlineAnnotationTool?) -> Void)?
@@ -196,9 +197,9 @@ final class InlineCaptureToolbar: NSView {
         x += Metrics.separatorLeadingSpace
         let separator = NSView(frame: CGRect(
             x: x,
-            y: (Self.preferredSize.height - 26) / 2,
+            y: (Self.preferredSize.height - Metrics.separatorHeight) / 2,
             width: Metrics.separatorWidth,
-            height: 26
+            height: Metrics.separatorHeight
         ))
         separator.wantsLayer = true
         separator.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.14).cgColor
@@ -253,7 +254,7 @@ private final class InlineToolbarButton: NSButton {
 
     init(symbol: String, title: String, target: AnyObject?, action: Selector?) {
         super.init(frame: .zero)
-        image = SnapSailStyle.symbol(symbol, size: 20, weight: .medium)
+        image = SnapSailStyle.symbol(symbol, size: 18, weight: .medium)
         imagePosition = .imageOnly
         isBordered = false
         focusRingType = .none
@@ -261,7 +262,7 @@ private final class InlineToolbarButton: NSButton {
         self.target = target
         self.action = action
         wantsLayer = true
-        layer?.cornerRadius = 11
+        layer?.cornerRadius = 10
         updateAppearance()
     }
 
