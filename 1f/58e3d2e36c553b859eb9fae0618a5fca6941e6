@@ -1,0 +1,23 @@
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_f1e9b19f57fba3 2,14-25,27,29,31,35,38,61-62,65,74-76,79-80,86,88,96-110,114-139,143-145,147-154,159-161,163,169-170,178-186,189-193,198,200-206,212-236,238,241,244,246-254,261-266,270,274-276,279-292,298-312,317-325,331-337,341-360,362-376,378-382,385-388,390-401,404-436,438,442-448,450-488
+  s_806fcff206d472::t_6419d8d9a80021 389,449
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_74578ac6130a4f 50,53,55-59,68,71,77,108-120
+  s_806fcff206d472::t_cf22dd0bbd9271 121-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "1f58e3d2e36c553b859eb9fae0618a5fca6941e6",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
