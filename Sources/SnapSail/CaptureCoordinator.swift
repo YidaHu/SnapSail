@@ -119,11 +119,7 @@ final class CaptureCoordinator {
             }
         case .save:
             recordAndCopy(image)
-            do {
-                _ = try ImageExporter.save(image, to: preferences.saveDirectory, preferences: preferences)
-            } catch {
-                showSaveFailure(error)
-            }
+            ImageExporter.presentSavePanel(for: image, preferences: preferences, window: nil)
         case .pin:
             recordAndCopy(image)
             PinWindowRegistry.shared.pin(image)
@@ -134,13 +130,6 @@ final class CaptureCoordinator {
         if preferences.historyEnabled { historyStore.add(image: image) }
         ImageExporter.copyToPasteboard(image)
         if preferences.playSound { NSSound(named: "Tink")?.play() }
-    }
-
-    private func showSaveFailure(_ error: Error) {
-        let alert = NSAlert(error: error)
-        alert.messageText = "Screenshot Copied, but Save Failed"
-        alert.informativeText = "The screenshot is already in your clipboard. Choose another save folder in SnapSail Preferences and try again."
-        alert.runModal()
     }
 
     private func ensurePermission() -> Bool {
