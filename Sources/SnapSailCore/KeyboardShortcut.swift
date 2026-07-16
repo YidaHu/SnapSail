@@ -78,3 +78,21 @@ public enum CaptureShortcutAction: String, CaseIterable, Hashable {
         )
     }
 }
+
+public enum ShortcutKeyLabel {
+    public static func label(keyCode: UInt16, characters: String?) -> String? {
+        let specialKeys: [UInt16: String] = [
+            36: "Return", 48: "Tab", 49: "Space", 51: "Delete", 53: "Esc",
+            64: "F17", 79: "F18", 80: "F19", 90: "F20", 96: "F5", 97: "F6",
+            98: "F7", 99: "F3", 100: "F8", 101: "F9", 103: "F11", 105: "F13",
+            106: "F16", 107: "F14", 109: "F10", 111: "F12", 113: "F15",
+            115: "Home", 116: "Page Up", 117: "Forward Delete", 118: "F4", 119: "End",
+            120: "F2", 121: "Page Down", 122: "F1", 123: "←", 124: "→", 125: "↓", 126: "↑"
+        ]
+        if let special = specialKeys[keyCode] { return special }
+
+        let modifierKeyCodes: Set<UInt16> = [54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
+        guard !modifierKeyCodes.contains(keyCode), let characters, !characters.isEmpty else { return nil }
+        return characters.uppercased()
+    }
+}

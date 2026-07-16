@@ -29,4 +29,11 @@ final class KeyboardShortcutTests: XCTestCase {
         XCTAssertFalse(CaptureShortcutAction.area.defaultShortcut.conflicts(for: .area, among: shortcuts))
         XCTAssertTrue(CaptureShortcutAction.area.defaultShortcut.conflicts(for: .window, among: shortcuts))
     }
+
+    func testKeyLabelsCoverOrdinaryAndSpecialKeys() {
+        XCTAssertEqual(ShortcutKeyLabel.label(keyCode: 15, characters: "r"), "R")
+        XCTAssertEqual(ShortcutKeyLabel.label(keyCode: 49, characters: " "), "Space")
+        XCTAssertEqual(ShortcutKeyLabel.label(keyCode: 122, characters: nil), "F1")
+        XCTAssertNil(ShortcutKeyLabel.label(keyCode: 55, characters: nil))
+    }
 }

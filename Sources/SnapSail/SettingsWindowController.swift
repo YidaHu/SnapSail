@@ -42,6 +42,7 @@ final class SettingsWindowController: NSWindowController {
     private var saveButton: NSButton!
     private var prefixField: NSTextField!
     private var pathLabel: NSTextField!
+    private var shortcutRecorders: [CaptureShortcutAction: ShortcutRecorderButton] = [:]
 
     init(
         preferences: AppPreferences,
@@ -162,10 +163,10 @@ final class SettingsWindowController: NSWindowController {
 
         let shortcuts = makePage()
         addSectionTitle("Global shortcuts", y: 430, to: shortcuts)
-        addShortcutRow(symbol: "viewfinder", title: "Capture Area", keys: "⌘ ⇧ 2", y: 365, to: shortcuts)
-        addShortcutRow(symbol: "macwindow", title: "Capture Window", keys: "⌘ ⇧ 3", y: 305, to: shortcuts)
-        addShortcutRow(symbol: "arrow.down.to.line.compact", title: "Scrolling Capture", keys: "⌘ ⇧ 4", y: 245, to: shortcuts)
-        addHint("Shortcuts work while SnapSail is running in the menu bar.", y: 174, to: shortcuts)
+        addShortcutRow(symbol: "viewfinder", title: "Capture Area", action: .area, y: 365, to: shortcuts)
+        addShortcutRow(symbol: "macwindow", title: "Capture Window", action: .window, y: 305, to: shortcuts)
+        addShortcutRow(symbol: "arrow.down.to.line.compact", title: "Scrolling Capture", action: .scrolling, y: 245, to: shortcuts)
+        addHint("Click a shortcut to record · Esc cancels · Delete restores the default", y: 174, to: shortcuts)
         pageViews[.shortcuts] = shortcuts
 
         for page in Page.allCases {
@@ -210,6 +211,9 @@ final class SettingsWindowController: NSWindowController {
         qualityLabel?.stringValue = "\(Int(preferences.jpegQuality * 100))%"
         prefixField?.stringValue = preferences.filenamePrefix
         pathLabel?.stringValue = preferences.saveDirectory.path
+        for action in CaptureShortcutAction.allCases {
+            shortcutRecorders[action]?.setShortcut(preferences.shortcut(for: action))
+        }
     }
 
     @objc private func qualityChanged() {
@@ -290,8 +294,14 @@ final class SettingsWindowController: NSWindowController {
         view.addSubview(detailLabel)
     }
 
-    private func addShortcutRow(symbol: String, title: String, keys: String, y: CGFloat, to view: NSView) {
-        let card = NSView(frame: CGRect(x: 176, y: y, width: 368, height: 46))
+    private func addShortcutRow(
+        symbol: String,
+        title: String,
+        action: CaptureShortcutAction,
+        y: CGFloat,
+        to view: NSView
+    ) {
+        let card = NSView(frame: CGRect(x: 150, y: y, width: 420, height: 46))
         card.wantsLayer = true
         card.layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.045).cgColor
         card.layer?.cornerRadius = 8
@@ -303,14 +313,35 @@ final class SettingsWindowController: NSWindowController {
         let label = NSTextField(labelWithString: title)
         label.frame = CGRect(x: 50, y: 13, width: 190, height: 20)
         card.addSubview(label)
-        let keyLabel = NSTextField(labelWithString: keys)
-        keyLabel.font = .monospacedSystemFont(ofSize: 12, weight: .semibold)
-        keyLabel.alignment = .center
-        keyLabel.frame = CGRect(x: 262, y: 11, width: 92, height: 22)
-        keyLabel.drawsBackground = true
-        keyLabel.backgroundColor = NSColor.labelColor.withAlphaComponent(0.07)
-        keyLabel.wantsLayer = true
-        keyLabel.layer?.cornerRadius = 5
-        card.addSubview(keyLabel)
+        let recorder = ShortcutRecorderButton(action: action, shortcut: preferences.shortcut(for: action))
+        recorder.frame = CGRect(x: 250, y: 8, width: 156, height: 30)
+        recorder.onShortcutProposed = { [weak self] candidate in
+            self?.applyShortcut(candidate, for: action) ?? false
+        }
+        card.addSubview(recorder)
+        shortcutRecorders[action] = recorder
+    }
+
+    private func applyShortcut(_ shortcut: KeyboardShortcut, for action: CaptureShortcutAction) -> Bool {
+        if shortcut.conflicts(for: action, among: preferences.shortcuts) {
+            showShortcutAlert(message: "That shortcut is already used by SnapSail.")
+            return false
+        }
+        guard onShortcutChange(action, shortcut) else {
+            showShortcutAlert(message: "macOS or another app is already using that shortcut.")
+            return false
+        }
+        loadValues()
+        return true
+    }
+
+    private func showShortcutAlert(message: String) {
+        let alert = NSAlert()
+        alert.messageText = "Shortcut Unavailable"
+        alert.informativeText = message
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        if let window { alert.beginSheetModal(for: window) }
+        else { alert.runModal() }
     }
 }
