@@ -1,0 +1,35 @@
+Sources/SnapSail/InlineCaptureToolbar.swift
+  s_806fcff206d472::t_cdd66af5f30ac6 104,144
+  s_806fcff206d472::t_39d54690b744ec 1-103,105-143,145-222
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_91db64b75bd59a 57-63,91,115-126,128,133-144
+  s_806fcff206d472::t_1d81bd48673380 145
+Sources/SnapSail/DesignSystem.swift
+  s_806fcff206d472::t_8fdbbfb18d7ebf 25-38,45,49-75
+  s_806fcff206d472::t_cdd66af5f30ac6 98
+  s_806fcff206d472::t_39d54690b744ec 7-8,39-44,46-48
+  s_806fcff206d472::t_6b7f392fb1bb91 76-77
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_79f0199a6319d4 205-206,209-214,222,224,227,240-242,245-248,255
+  s_806fcff206d472::t_51c279c80c660c 402-406,409
+  s_806fcff206d472::t_20ba3f1db4e445 319-326,334-337,360-361,371-378
+  s_806fcff206d472::t_590c798c186c9e 17,25-26,108-113,118-123,196
+  s_806fcff206d472::t_4b641dbb828778 423-429,434,440-444,446-447,449,453-458,460-466,469,471-473,475-580
+  s_806fcff206d472::t_7184d581948d58 285-290,307-309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "622f7bd64717e14d7142ab890cb4a0db2e85589a",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
