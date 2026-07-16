@@ -171,14 +171,16 @@ final class CaptureCoordinator {
 
     private func finishCapture(_ image: CGImage, action: SelectionAction) {
         switch action {
-        case .capture, .copy, .scroll:
+        case .capture:
             recordAndCopy(image)
             if preferences.saveAfterCapture {
                 _ = try? ImageExporter.save(image, to: preferences.saveDirectory, preferences: preferences)
             }
-        case .save:
+        case .copy, .scroll:
             recordAndCopy(image)
-            ImageExporter.presentSavePanel(for: image, preferences: preferences, window: nil)
+        case .save:
+            record(image)
+            _ = try? ImageExporter.save(image, to: preferences.saveDirectory, preferences: preferences)
         case .pin:
             recordAndCopy(image)
             PinWindowRegistry.shared.pin(image)
@@ -186,8 +188,12 @@ final class CaptureCoordinator {
     }
 
     private func recordAndCopy(_ image: CGImage) {
-        if preferences.historyEnabled { historyStore.add(image: image) }
+        record(image)
         ImageExporter.copyToPasteboard(image)
+    }
+
+    private func record(_ image: CGImage) {
+        if preferences.historyEnabled { historyStore.add(image: image) }
         if preferences.playSound { NSSound(named: "Tink")?.play() }
     }
 

@@ -5,6 +5,8 @@ final class AppLocalizationTests: XCTestCase {
     func testReturnsEnglishAndSimplifiedChineseText() {
         XCTAssertEqual(AppLocalization.text(.captureArea, language: .english), "Capture Area")
         XCTAssertEqual(AppLocalization.text(.captureArea, language: .simplifiedChinese), "区域截图")
+        XCTAssertEqual(AppLocalization.text(.saveAndCopy, language: .english), "Download")
+        XCTAssertEqual(AppLocalization.text(.saveAndCopy, language: .simplifiedChinese), "下载")
         XCTAssertEqual(AppLanguage.simplifiedChinese.displayName, "简体中文")
     }
 
