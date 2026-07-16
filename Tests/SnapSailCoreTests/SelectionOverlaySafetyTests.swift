@@ -2,6 +2,28 @@ import Foundation
 import XCTest
 
 final class SelectionOverlaySafetyTests: XCTestCase {
+    func testCaptureEntryPointsIgnoreReentrantOverlayRequests() throws {
+        let sourceURL = projectRoot
+            .appendingPathComponent("Sources/SnapSail/CaptureCoordinator.swift")
+        let source = try String(contentsOf: sourceURL)
+
+        for (method, nextMethod) in [
+            ("private func beginAreaCapture(scrolling: Bool)", "private func beginWindowCapture()"),
+            ("private func beginWindowCapture()", "private func startScrolling(rect: CGRect)")
+        ] {
+            let methodStart = try XCTUnwrap(source.range(of: method))
+            let methodEnd = try XCTUnwrap(
+                source.range(of: nextMethod, range: methodStart.upperBound..<source.endIndex)
+            )
+            let methodBody = String(source[methodStart.lowerBound..<methodEnd.lowerBound])
+
+            XCTAssertTrue(
+                methodBody.contains("guard selectionOverlay == nil else { return }"),
+                "\(method) must not replace a live full-screen overlay with an unreachable one."
+            )
+        }
+    }
+
     func testSubminimumSelectionCancelsOverlayInsteadOfLeavingInputBlocked() throws {
         let sourceURL = projectRoot
             .appendingPathComponent("Sources/SnapSail/SelectionOverlay.swift")

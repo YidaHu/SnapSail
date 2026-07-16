@@ -102,6 +102,7 @@ final class CaptureCoordinator {
     }
 
     private func beginAreaCapture(scrolling: Bool) {
+        guard selectionOverlay == nil else { return }
         guard ensurePermission() else { return }
         selectionOverlay = SelectionOverlayController(mode: .region, captureService: captureService) { [weak self] outcome in
             guard let self else { return }
@@ -126,6 +127,7 @@ final class CaptureCoordinator {
     }
 
     private func beginWindowCapture() {
+        guard selectionOverlay == nil else { return }
         guard ensurePermission() else { return }
         selectionOverlay = SelectionOverlayController(mode: .window, captureService: captureService) { [weak self] outcome in
             guard let self else { return }
