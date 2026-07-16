@@ -47,9 +47,12 @@ final class SelectionOverlayController: NSObject {
 
     func begin() {
         if mode == .window { availableWindows = captureService.windows() }
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        let mouseLocation = NSEvent.mouseLocation
+        var preferredWindow: NSWindow?
         for screen in NSScreen.screens {
             let window = OverlayWindow(
-                contentRect: screen.frame,
+                contentRect: OverlayScreenGeometry.localContentRect(for: screen.frame),
                 styleMask: .borderless,
                 backing: .buffered,
                 defer: false,
@@ -66,9 +69,10 @@ final class SelectionOverlayController: NSObject {
             window.acceptsMouseMovedEvents = true
             overlayWindows.append(window)
             overlayViews.append(view)
+            if screen.frame.contains(mouseLocation) { preferredWindow = window }
             window.orderFrontRegardless()
         }
-        overlayWindows.first?.makeKey()
+        (preferredWindow ?? overlayWindows.first)?.makeKeyAndOrderFront(nil)
         NSCursor.crosshair.push()
     }
 
@@ -231,6 +235,7 @@ final class SelectionOverlayView: NSView {
 
     required init?(coder: NSCoder) { nil }
     override var acceptsFirstResponder: Bool { true }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
     var globalSelectionRect: CGRect? {
         guard let region = selection.region, let window else { return nil }
