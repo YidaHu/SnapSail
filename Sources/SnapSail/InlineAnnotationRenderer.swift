@@ -5,13 +5,15 @@ enum InlineAnnotationRenderer {
     static func draw(
         annotations: [InlineAnnotation],
         draft: InlineAnnotation?,
-        in selection: CGRect
+        in selection: CGRect,
+        sourceImage: CGImage? = nil
     ) {
+        let previewSource = sourceImage.map { NSImage(cgImage: $0, size: selection.size) }
         for annotation in annotations {
-            draw(annotation, in: selection, lineScale: 1, sourceImage: nil)
+            draw(annotation, in: selection, lineScale: 1, sourceImage: previewSource)
         }
         if let draft {
-            draw(draft, in: selection, lineScale: 1, sourceImage: nil)
+            draw(draft, in: selection, lineScale: 1, sourceImage: previewSource)
         }
     }
 
@@ -86,9 +88,13 @@ enum InlineAnnotationRenderer {
             path.stroke()
         case .pixelate:
             if let sourceImage, shapeRect.width >= 2, shapeRect.height >= 2 {
-                drawPixelation(of: sourceImage, in: shapeRect)
+                drawPixelation(
+                    of: sourceImage,
+                    in: shapeRect,
+                    sourceRect: shapeRect.offsetBy(dx: -rect.minX, dy: -rect.minY)
+                )
             } else {
-                drawPixelationPreview(in: shapeRect, color: color)
+                drawPixelationPlaceholder(in: shapeRect)
             }
         case .text:
             let fontSize = max(15, 18 * lineScale)
@@ -145,29 +151,31 @@ enum InlineAnnotationRenderer {
         path.stroke()
     }
 
-    private static func drawPixelationPreview(in rect: CGRect, color: NSColor) {
-        color.withAlphaComponent(0.16).setFill()
-        rect.fill()
-        color.withAlphaComponent(0.55).setStroke()
-        let grid = NSBezierPath()
-        let step: CGFloat = 9
-        var x = rect.minX
-        while x <= rect.maxX {
-            grid.move(to: CGPoint(x: x, y: rect.minY))
-            grid.line(to: CGPoint(x: x, y: rect.maxY))
-            x += step
-        }
+    private static func drawPixelationPlaceholder(in rect: CGRect) {
+        let blockSize: CGFloat = 10
+        var row = 0
         var y = rect.minY
-        while y <= rect.maxY {
-            grid.move(to: CGPoint(x: rect.minX, y: y))
-            grid.line(to: CGPoint(x: rect.maxX, y: y))
-            y += step
+        while y < rect.maxY {
+            var column = 0
+            var x = rect.minX
+            while x < rect.maxX {
+                let shade: CGFloat = (row + column).isMultiple(of: 2) ? 0.38 : 0.52
+                NSColor(white: shade, alpha: 0.88).setFill()
+                CGRect(
+                    x: x,
+                    y: y,
+                    width: min(blockSize, rect.maxX - x),
+                    height: min(blockSize, rect.maxY - y)
+                ).fill()
+                x += blockSize
+                column += 1
+            }
+            y += blockSize
+            row += 1
         }
-        grid.lineWidth = 0.7
-        grid.stroke()
     }
 
-    private static func drawPixelation(of source: NSImage, in rect: CGRect) {
+    private static func drawPixelation(of source: NSImage, in rect: CGRect, sourceRect: CGRect) {
         let blockSize: CGFloat = 12
         let reducedSize = NSSize(
             width: max(1, ceil(rect.width / blockSize)),
@@ -178,7 +186,7 @@ enum InlineAnnotationRenderer {
         NSGraphicsContext.current?.imageInterpolation = .low
         source.draw(
             in: CGRect(origin: .zero, size: reducedSize),
-            from: rect,
+            from: sourceRect,
             operation: .copy,
             fraction: 1
         )

@@ -16,7 +16,7 @@ let package = Package(
         ),
         .testTarget(
             name: "SnapSailCoreTests",
-            dependencies: ["SnapSailCore"]
+            dependencies: ["SnapSailCore", "SnapSail"]
         )
     ]
 )

@@ -156,6 +156,15 @@ final class SelectionOverlayController: NSObject {
         )
     }
 
+    func annotationSourceImage(in appKitRect: CGRect, below windowNumber: Int) -> CGImage? {
+        CGWindowListCreateImage(
+            captureService.quartzRect(fromAppKitRect: appKitRect).integral,
+            .optionOnScreenBelowWindow,
+            CGWindowID(windowNumber),
+            [.bestResolution]
+        )
+    }
+
     func highlightRects(for screen: NSScreen) -> [(CGRect, Bool)] {
         availableWindows.compactMap { descriptor in
             let selected = selectedWindowIDs.contains(descriptor.id)
@@ -214,6 +223,7 @@ final class SelectionOverlayView: NSView {
     private var annotationDraft: InlineAnnotation?
     private var activeTool: InlineAnnotationTool?
     private var activeColor = InlineAnnotationColor.red
+    private var annotationSourceImage: CGImage?
     private var textAnchor: CGPoint?
     private weak var inlineTextField: NSTextField?
 
@@ -249,6 +259,7 @@ final class SelectionOverlayView: NSView {
         selection = SelectionModel(bounds: bounds)
         annotationHistory.removeAll()
         annotationDraft = nil
+        annotationSourceImage = nil
         activeTool = nil
         toolbar.clearActiveTool()
         interaction = .idle
@@ -258,6 +269,7 @@ final class SelectionOverlayView: NSView {
 
     func modeDidChange() {
         annotationDraft = nil
+        annotationSourceImage = nil
         interaction = .idle
         updateControls()
         needsDisplay = true
@@ -265,6 +277,7 @@ final class SelectionOverlayView: NSView {
 
     func nudge(dx: CGFloat, dy: CGFloat, accelerated: Bool) {
         selection.nudge(dx: dx, dy: dy, accelerated: accelerated)
+        refreshAnnotationSourceImage()
         interaction = .editing
         updateControls()
         needsDisplay = true
@@ -302,7 +315,8 @@ final class SelectionOverlayView: NSView {
             InlineAnnotationRenderer.draw(
                 annotations: annotationHistory.annotations,
                 draft: annotationDraft,
-                in: region
+                in: region,
+                sourceImage: annotationSourceImage
             )
 
             if case .editing = interaction { drawHandles(for: region) }
@@ -350,6 +364,7 @@ final class SelectionOverlayView: NSView {
             selection = SelectionModel(bounds: bounds)
             annotationHistory.removeAll()
             annotationDraft = nil
+            annotationSourceImage = nil
             activeTool = nil
             toolbar.clearActiveTool()
             selection.setRegion(CGRect(origin: point, size: CGSize(width: 1, height: 1)))
@@ -394,6 +409,7 @@ final class SelectionOverlayView: NSView {
             return
         }
         if let region = selection.region, region.width >= 24, region.height >= 24 {
+            refreshAnnotationSourceImage()
             interaction = .editing
         } else {
             interaction = .idle
@@ -486,6 +502,9 @@ final class SelectionOverlayView: NSView {
         addSubview(toolbar)
         toolbar.onToolSelected = { [weak self] tool in
             self?.activeTool = tool
+            if tool == .pixelate, self?.annotationSourceImage == nil {
+                self?.refreshAnnotationSourceImage()
+            }
             NSCursor.crosshair.set()
         }
         toolbar.onColorChanged = { [weak self] color in self?.activeColor = color }
@@ -606,6 +625,19 @@ final class SelectionOverlayView: NSView {
         if y < 8 { y = point.y + 18 }
         loupe.frame.origin = CGPoint(x: x, y: y)
         loupe.needsDisplay = true
+    }
+
+    private func refreshAnnotationSourceImage() {
+        guard let controller,
+              let window,
+              let region = selection.region else {
+            annotationSourceImage = nil
+            return
+        }
+        annotationSourceImage = controller.annotationSourceImage(
+            in: window.convertToScreen(region),
+            below: window.windowNumber
+        )
     }
 
     private func drawHandles(for region: CGRect) {
