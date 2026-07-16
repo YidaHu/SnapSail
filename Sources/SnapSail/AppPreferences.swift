@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import SnapSailCore
 
 enum CaptureOutputFormat: String, CaseIterable {
     case png
@@ -22,13 +23,25 @@ final class AppPreferences {
         static let saveDirectory = "saveDirectory"
         static let filenamePrefix = "filenamePrefix"
         static let historyEnabled = "historyEnabled"
+
+        static func shortcutKeyCode(_ action: CaptureShortcutAction) -> String {
+            "shortcut.\(action.rawValue).keyCode"
+        }
+
+        static func shortcutModifiers(_ action: CaptureShortcutAction) -> String {
+            "shortcut.\(action.rawValue).modifiers"
+        }
+
+        static func shortcutDisplay(_ action: CaptureShortcutAction) -> String {
+            "shortcut.\(action.rawValue).display"
+        }
     }
 
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        defaults.register(defaults: [
+        var registeredValues: [String: Any] = [
             Key.outputFormat: CaptureOutputFormat.png.rawValue,
             Key.jpegQuality: 0.9,
             Key.includeWindowShadow: true,
@@ -39,7 +52,14 @@ final class AppPreferences {
             Key.saveDirectory: FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first?.path ?? NSHomeDirectory(),
             Key.filenamePrefix: "SnapSail",
             Key.historyEnabled: true
-        ])
+        ]
+        for action in CaptureShortcutAction.allCases {
+            let shortcut = action.defaultShortcut
+            registeredValues[Key.shortcutKeyCode(action)] = Int(shortcut.keyCode)
+            registeredValues[Key.shortcutModifiers(action)] = Int(shortcut.modifiers.rawValue)
+            registeredValues[Key.shortcutDisplay(action)] = shortcut.keyDisplay
+        }
+        defaults.register(defaults: registeredValues)
     }
 
     var outputFormat: CaptureOutputFormat {
@@ -90,5 +110,32 @@ final class AppPreferences {
     var historyEnabled: Bool {
         get { defaults.bool(forKey: Key.historyEnabled) }
         set { defaults.set(newValue, forKey: Key.historyEnabled) }
+    }
+
+    func shortcut(for action: CaptureShortcutAction) -> KeyboardShortcut {
+        KeyboardShortcut(
+            keyCode: UInt32(defaults.integer(forKey: Key.shortcutKeyCode(action))),
+            modifiers: ShortcutModifiers(
+                rawValue: UInt(defaults.integer(forKey: Key.shortcutModifiers(action)))
+            ),
+            keyDisplay: defaults.string(forKey: Key.shortcutDisplay(action))
+                ?? action.defaultShortcut.keyDisplay
+        )
+    }
+
+    func setShortcut(_ shortcut: KeyboardShortcut, for action: CaptureShortcutAction) {
+        defaults.set(Int(shortcut.keyCode), forKey: Key.shortcutKeyCode(action))
+        defaults.set(Int(shortcut.modifiers.rawValue), forKey: Key.shortcutModifiers(action))
+        defaults.set(shortcut.keyDisplay, forKey: Key.shortcutDisplay(action))
+    }
+
+    func resetShortcut(for action: CaptureShortcutAction) {
+        setShortcut(action.defaultShortcut, for: action)
+    }
+
+    var shortcuts: [CaptureShortcutAction: KeyboardShortcut] {
+        Dictionary(uniqueKeysWithValues: CaptureShortcutAction.allCases.map {
+            ($0, shortcut(for: $0))
+        })
     }
 }

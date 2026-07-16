@@ -1,4 +1,5 @@
 import AppKit
+import SnapSailCore
 
 final class SettingsWindowController: NSWindowController {
     private enum Page: Int, CaseIterable {
@@ -26,6 +27,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private let preferences: AppPreferences
+    private let onShortcutChange: (CaptureShortcutAction, KeyboardShortcut) -> Bool
     private var pageViews: [Page: NSView] = [:]
     private var tabButtons: [NSButton] = []
 
@@ -41,8 +43,12 @@ final class SettingsWindowController: NSWindowController {
     private var prefixField: NSTextField!
     private var pathLabel: NSTextField!
 
-    init(preferences: AppPreferences) {
+    init(
+        preferences: AppPreferences,
+        onShortcutChange: @escaping (CaptureShortcutAction, KeyboardShortcut) -> Bool = { _, _ in false }
+    ) {
         self.preferences = preferences
+        self.onShortcutChange = onShortcutChange
         let window = NSWindow(
             contentRect: CGRect(x: 0, y: 0, width: 720, height: 600),
             styleMask: [.titled, .closable],

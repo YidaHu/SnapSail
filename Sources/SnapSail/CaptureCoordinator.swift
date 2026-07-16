@@ -10,7 +10,12 @@ final class CaptureCoordinator {
     private var selectionOverlay: SelectionOverlayController?
     private var scrollController: ScrollCaptureController?
     private var editorControllers: [EditorWindowController] = []
-    private lazy var settingsController = SettingsWindowController(preferences: preferences)
+    private lazy var settingsController = SettingsWindowController(
+        preferences: preferences,
+        onShortcutChange: { [weak self] action, shortcut in
+            self?.replaceShortcut(shortcut, for: action) ?? false
+        }
+    )
     private lazy var historyStore = HistoryStore()
     private lazy var historyController = HistoryWindowController(store: historyStore) { [weak self] image in
         self?.presentEditor(image)
@@ -25,18 +30,10 @@ final class CaptureCoordinator {
         menuBar.onHistory = { [weak self] in self?.historyController.showWindow(nil) }
         self.menuBar = menuBar
 
-        let hotKeys = GlobalHotKeyManager()
-        let modifiers = UInt32(cmdKey | shiftKey)
-        _ = hotKeys.register(id: 2, keyCode: UInt32(kVK_ANSI_2), modifiers: modifiers) { [weak self] in
-            self?.beginAreaCapture(scrolling: false)
+        if !installHotKeys() {
+            CaptureShortcutAction.allCases.forEach { preferences.resetShortcut(for: $0) }
+            _ = installHotKeys()
         }
-        _ = hotKeys.register(id: 3, keyCode: UInt32(kVK_ANSI_3), modifiers: modifiers) { [weak self] in
-            self?.beginWindowCapture()
-        }
-        _ = hotKeys.register(id: 4, keyCode: UInt32(kVK_ANSI_4), modifiers: modifiers) { [weak self] in
-            self?.beginAreaCapture(scrolling: true)
-        }
-        self.hotKeys = hotKeys
     }
 
     func stop() {
@@ -44,6 +41,60 @@ final class CaptureCoordinator {
         selectionOverlay = nil
         hotKeys?.unregisterAll()
         hotKeys = nil
+    }
+
+    private func installHotKeys() -> Bool {
+        hotKeys?.unregisterAll()
+        hotKeys = nil
+
+        let manager = GlobalHotKeyManager()
+        for action in CaptureShortcutAction.allCases {
+            let shortcut = preferences.shortcut(for: action)
+            let registered = manager.register(
+                id: action.registrationID,
+                keyCode: shortcut.keyCode,
+                modifiers: carbonModifiers(shortcut.modifiers),
+                action: shortcutAction(for: action)
+            )
+            guard registered else {
+                manager.unregisterAll()
+                return false
+            }
+        }
+        hotKeys = manager
+        menuBar?.updateShortcuts(preferences.shortcuts)
+        return true
+    }
+
+    private func replaceShortcut(_ shortcut: KeyboardShortcut, for action: CaptureShortcutAction) -> Bool {
+        guard !shortcut.conflicts(for: action, among: preferences.shortcuts) else { return false }
+        let previous = preferences.shortcut(for: action)
+        preferences.setShortcut(shortcut, for: action)
+        if installHotKeys() { return true }
+
+        preferences.setShortcut(previous, for: action)
+        _ = installHotKeys()
+        return false
+    }
+
+    private func shortcutAction(for action: CaptureShortcutAction) -> () -> Void {
+        switch action {
+        case .area:
+            return { [weak self] in self?.beginAreaCapture(scrolling: false) }
+        case .window:
+            return { [weak self] in self?.beginWindowCapture() }
+        case .scrolling:
+            return { [weak self] in self?.beginAreaCapture(scrolling: true) }
+        }
+    }
+
+    private func carbonModifiers(_ modifiers: ShortcutModifiers) -> UInt32 {
+        var result: UInt32 = 0
+        if modifiers.contains(.command) { result |= UInt32(cmdKey) }
+        if modifiers.contains(.shift) { result |= UInt32(shiftKey) }
+        if modifiers.contains(.option) { result |= UInt32(optionKey) }
+        if modifiers.contains(.control) { result |= UInt32(controlKey) }
+        return result
     }
 
     private func beginAreaCapture(scrolling: Bool) {
