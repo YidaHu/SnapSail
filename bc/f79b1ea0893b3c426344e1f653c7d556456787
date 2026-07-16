@@ -1,0 +1,26 @@
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_8a7a8a2b1d6990 174,179,181-183,191,193-196
+Sources/SnapSailCore/AppLocalization.swift
+  s_806fcff206d472::t_8a7a8a2b1d6990 73,121
+Tests/SnapSailCoreTests/AppLocalizationTests.swift
+  s_806fcff206d472::t_d25dbbcda4068a 8-9
+Tests/SnapSailCoreTests/CaptureCompletionBehaviorTests.swift
+  s_806fcff206d472::t_fbdba97a15b7f5 7
+  s_806fcff206d472::t_d25dbbcda4068a 1-6,8-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "bcf79b1ea0893b3c426344e1f653c7d556456787",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
