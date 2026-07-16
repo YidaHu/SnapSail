@@ -1,0 +1,28 @@
+Tests/SnapSailCoreTests/VerticalFrameMatcherTests.swift
+  s_806fcff206d472::t_54c874a18e7966 19,34-49
+  s_806fcff206d472::t_045fc94e5aa7c3 50
+Sources/SnapSailCore/SelectionModel.swift
+  s_806fcff206d472::t_fc088f94f14ccc 1-76
+Sources/SnapSailCore/VerticalFrameMatcher.swift
+  s_806fcff206d472::t_2a4f73f38cf36a 56-57,69-80,83-85
+  s_806fcff206d472::t_fc088f94f14ccc 7,9,12,51,53,58-59,66-68,81,86-88,96-97
+Tests/SnapSailCoreTests/SelectionModelTests.swift
+  s_806fcff206d472::t_fc088f94f14ccc 16-17
+  s_806fcff206d472::t_54c874a18e7966 1-15,18-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "388c727fa231493fc60928826e3d5cb357931676",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
