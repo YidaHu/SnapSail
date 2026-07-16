@@ -1,0 +1,23 @@
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_1aaa71408bf8dd 50-52,55,72,75,238
+Tests/SnapSailCoreTests/OverlayScreenGeometryTests.swift
+  s_806fcff206d472::t_e9cb4a4b5eac61 1-29
+Sources/SnapSailCore/OverlayScreenGeometry.swift
+  s_806fcff206d472::t_1aaa71408bf8dd 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "5ee6bd0cbdfbcef5530f20200f33f3ceb84988c0",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
