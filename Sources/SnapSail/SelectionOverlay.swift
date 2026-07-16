@@ -410,12 +410,15 @@ final class SelectionOverlayView: NSView {
             needsDisplay = true
             return
         }
-        if let region = selection.region, region.width >= 24, region.height >= 24 {
-            refreshAnnotationSourceImage()
-            interaction = .editing
-        } else {
-            interaction = .idle
+        guard let region = selection.region,
+              region.width >= selection.minimumSize,
+              region.height >= selection.minimumSize else {
+            loupe.isHidden = true
+            controller?.cancel()
+            return
         }
+        refreshAnnotationSourceImage()
+        interaction = .editing
         loupe.isHidden = true
         updateControls()
         needsDisplay = true
