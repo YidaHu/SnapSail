@@ -16,6 +16,7 @@ final class VerticalFrameMatcherTests: XCTestCase {
 
         XCTAssertEqual(match.shift, 4)
         XCTAssertGreaterThan(match.confidence, 0.99)
+        XCTAssertGreaterThan(match.evaluatedCandidates, 0)
     }
 
     func testRejectsUnrelatedFrames() {
@@ -29,5 +30,22 @@ final class VerticalFrameMatcherTests: XCTestCase {
         )
 
         XCTAssertNil(matcher.match(previous: previous, current: current))
+    }
+
+    func testUsesBoundedCandidateSearchForLargeFrames() throws {
+        let previous = TestImageFactory.patternedImage(width: 1_200, rows: 0..<800)
+        let current = TestImageFactory.patternedImage(width: 1_200, rows: 96..<896)
+        let matcher = VerticalFrameMatcher(
+            minimumShift: 3,
+            maximumShiftRatio: 0.72,
+            sampleStride: 5,
+            acceptanceScore: 2
+        )
+
+        let match = try XCTUnwrap(matcher.match(previous: previous, current: current))
+
+        XCTAssertEqual(match.shift, 96)
+        XCTAssertGreaterThan(match.confidence, 0.9)
+        XCTAssertLessThan(match.evaluatedCandidates, 120)
     }
 }

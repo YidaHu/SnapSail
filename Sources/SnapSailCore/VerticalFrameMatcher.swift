@@ -4,10 +4,12 @@ import Foundation
 public struct VerticalFrameMatch: Equatable {
     public let shift: Int
     public let confidence: Double
+    public let evaluatedCandidates: Int
 
-    public init(shift: Int, confidence: Double) {
+    public init(shift: Int, confidence: Double, evaluatedCandidates: Int = 0) {
         self.shift = shift
         self.confidence = confidence
+        self.evaluatedCandidates = evaluatedCandidates
     }
 }
 
@@ -46,28 +48,44 @@ public struct VerticalFrameMatcher {
 
         let xMargin = max(0, previous.width / 12)
         let topMargin = max(0, height / 12)
-        var bestShift = 0
-        var bestScore = Double.greatestFiniteMagnitude
-
-        for shift in minimumShift...maximumShift {
+        func score(for shift: Int, fine: Bool) -> Double? {
             let overlap = height - shift
-            guard overlap > topMargin * 2 else { continue }
+            guard overlap > topMargin * 2 else { return nil }
             var difference = 0.0
             var sampleCount = 0
-
-            for y in stride(from: topMargin, to: overlap - topMargin, by: sampleStride) {
-                for x in stride(from: xMargin, to: previous.width - xMargin, by: sampleStride) {
+            let xStride = fine ? max(sampleStride, previous.width / 120) : max(sampleStride, previous.width / 32)
+            let yStride = fine ? max(sampleStride, overlap / 80) : max(sampleStride, overlap / 8)
+            for y in stride(from: topMargin, to: overlap - topMargin, by: yStride) {
+                for x in stride(from: xMargin, to: previous.width - xMargin, by: xStride) {
                     let a = previousBuffer.gray(x: x, y: y + shift)
                     let b = currentBuffer.gray(x: x, y: y)
                     difference += Double(abs(a - b))
                     sampleCount += 1
                 }
             }
+            return sampleCount > 0 ? difference / Double(sampleCount) : nil
+        }
 
-            guard sampleCount > 0 else { continue }
-            let score = difference / Double(sampleCount)
-            if score < bestScore {
-                bestScore = score
+        let coarseWinners = (minimumShift...maximumShift)
+            .compactMap { shift -> (Int, Double)? in
+                score(for: shift, fine: false).map { (shift, $0) }
+            }
+            .sorted { $0.1 < $1.1 }
+            .prefix(6)
+
+        var evaluated = Set<Int>()
+        for winner in coarseWinners {
+            for shift in max(minimumShift, winner.0 - 2)...min(maximumShift, winner.0 + 2) {
+                evaluated.insert(shift)
+            }
+        }
+
+        var bestShift = 0
+        var bestScore = Double.greatestFiniteMagnitude
+        for shift in evaluated.sorted() {
+            evaluated.insert(shift)
+            if let candidateScore = score(for: shift, fine: true), candidateScore < bestScore {
+                bestScore = candidateScore
                 bestShift = shift
             }
         }
@@ -75,7 +93,8 @@ public struct VerticalFrameMatcher {
         guard bestShift > 0, bestScore <= acceptanceScore else { return nil }
         return VerticalFrameMatch(
             shift: bestShift,
-            confidence: max(0, min(1, 1 - bestScore / max(acceptanceScore, 0.001)))
+            confidence: max(0, min(1, 1 - bestScore / max(acceptanceScore, 0.001))),
+            evaluatedCandidates: evaluated.count
         )
     }
 }
