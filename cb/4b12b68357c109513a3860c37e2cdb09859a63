@@ -1,0 +1,43 @@
+README.md
+  s_806fcff206d472::t_08334ef04004b3 137,206
+Tests/SnapSailCoreTests/BuildScriptTests.swift
+  s_806fcff206d472::t_d828e922f78bdb 21-24
+Sources/SnapSail/SettingsWindowController.swift
+  s_806fcff206d472::t_bd9879038ad88c 30,42,54,59,121-127,132-133,227,250-289
+  s_806fcff206d472::t_dac0ac247b35f6 290
+Sources/SnapSail/LaunchAtLoginController.swift
+  s_806fcff206d472::t_bd9879038ad88c 1-67,69-94
+  s_806fcff206d472::t_d828e922f78bdb 68,95-102
+Tests/SnapSailCoreTests/LaunchAtLoginSettingsTests.swift
+  s_806fcff206d472::t_c23298579f46aa 1-10,16-20,22,24-25,47-48,61-62
+  s_806fcff206d472::t_16a5d7affde4a7 26-46
+  s_806fcff206d472::t_8f9c0346ced2e0 11-15,23,49-60
+  s_806fcff206d472::t_444ec03fe2ca9c 21
+Tests/SnapSailCoreTests/AppLocalizationTests.swift
+  s_806fcff206d472::t_bd9879038ad88c 11-12
+Tests/SnapSailCoreTests/LaunchAtLoginControllerTests.swift
+  s_806fcff206d472::t_bd9879038ad88c 1-67
+.gitignore
+  s_806fcff206d472::t_868a7c20a4bb37 3
+Scripts/build-app.sh
+  s_806fcff206d472::t_d828e922f78bdb 7-12
+  s_806fcff206d472::t_bfcbcbff07ef77 13-15
+Sources/SnapSailCore/AppLocalization.swift
+  s_806fcff206d472::t_bd9879038ad88c 15-16,49-53,104-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "cb4b12b68357c109513a3860c37e2cdb09859a63",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
