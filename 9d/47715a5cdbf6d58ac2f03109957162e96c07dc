@@ -1,0 +1,21 @@
+docs/superpowers/specs/2026-07-16-compact-capture-chrome-design.md
+  s_806fcff206d472::t_ba8dd1b6ebf402 1-33
+docs/superpowers/plans/2026-07-16-compact-capture-chrome.md
+  s_806fcff206d472::t_ba8dd1b6ebf402 1-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9d47715a5cdbf6d58ac2f03109957162e96c07dc",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
