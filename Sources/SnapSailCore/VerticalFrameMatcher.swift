@@ -18,17 +18,20 @@ public struct VerticalFrameMatcher {
     public let maximumShiftRatio: Double
     public let sampleStride: Int
     public let acceptanceScore: Double
+    public let stationaryScore: Double
 
     public init(
         minimumShift: Int = 3,
         maximumShiftRatio: Double = 0.72,
         sampleStride: Int = 4,
-        acceptanceScore: Double = 14
+        acceptanceScore: Double = 14,
+        stationaryScore: Double = 1
     ) {
         self.minimumShift = minimumShift
         self.maximumShiftRatio = maximumShiftRatio
         self.sampleStride = max(1, sampleStride)
         self.acceptanceScore = acceptanceScore
+        self.stationaryScore = max(0, stationaryScore)
     }
 
     public func match(previous: CGImage, current: CGImage) -> VerticalFrameMatch? {
@@ -64,6 +67,14 @@ public struct VerticalFrameMatcher {
                 }
             }
             return sampleCount > 0 ? difference / Double(sampleCount) : nil
+        }
+
+        // A stationary frame must win before we search for a scrolling offset.
+        // Uniform backgrounds and repeated rows can otherwise produce a perfect
+        // score at any non-zero shift and make the stitched image grow forever.
+        if let zeroShiftScore = score(for: 0, fine: true),
+           zeroShiftScore <= stationaryScore {
+            return nil
         }
 
         let coarseWinners = (minimumShift...maximumShift)
