@@ -1,4 +1,5 @@
 import AppKit
+import SnapSailCore
 
 final class EditorWindowController: NSWindowController, NSWindowDelegate {
     private let canvas: AnnotationCanvasView
@@ -210,8 +211,12 @@ final class PinWindowController: NSObject, NSWindowDelegate {
 
 private final class PinImageView: NSImageView {
     override func mouseDown(with event: NSEvent) {
-        if event.clickCount >= 2 { window?.close() }
-        else { super.mouseDown(with: event) }
+        switch PinInteraction.primaryAction(clickCount: event.clickCount) {
+        case .close:
+            window?.close()
+        case .drag:
+            window?.performDrag(with: event)
+        }
     }
 
     override func rightMouseDown(with event: NSEvent) {
