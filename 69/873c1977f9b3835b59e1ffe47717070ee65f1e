@@ -1,0 +1,27 @@
+Tests/SnapSailCoreTests/InlineAnnotationRendererTests.swift
+  s_806fcff206d472::t_7e02791cf7ae96 1-39,100
+  s_806fcff206d472::t_ccefaeaeee771a 40-99
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_b8d7e1aab3a381 159-167,226,262,272,280,318-319,367,412,505-507,630-641
+  s_806fcff206d472::t_930ccab2dd6798 642
+Package.swift
+  s_806fcff206d472::t_7e02791cf7ae96 19
+Sources/SnapSail/InlineAnnotationRenderer.swift
+  s_806fcff206d472::t_b8d7e1aab3a381 8-9,11,13,16,91-95,97,154-156,158-174,178,189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "69873c1977f9b3835b59e1ffe47717070ee65f1e",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
