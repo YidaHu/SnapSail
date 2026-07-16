@@ -1,0 +1,27 @@
+Sources/SnapSail/AnnotationCanvasView.swift
+  s_806fcff206d472::t_317257111fd228 27-40
+Sources/SnapSail/EditorWindowController.swift
+  s_806fcff206d472::t_317257111fd228 7-9,20,25-27,48,54,56,58-59,62,65-73,77-79,84,90-98,100-102,104-105,107,109,113,115-118,126,131-134
+Sources/SnapSail/SettingsWindowController.swift
+  s_806fcff206d472::t_dd9682372bbc6b 4-27,29-31,34,37,47,52,54,57,72-123,127,129-138,140,143,145,148-149,151-155,157-167,169,175-194,198,204,209-213,217,237,239-241,245,247-248,253-265,267-308
+Sources/SnapSail/MenuBarController.swift
+  s_806fcff206d472::t_8dbed02c67c3d4 23-25,27-28,40,43-44
+Sources/SnapSail/ScrollCaptureController.swift
+  s_806fcff206d472::t_fe58b9283ce460 25,63-74,111,119,125-149,151-152,155,157-159,162-163,167-168,172-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "ed50d2859eda085e604164a70f3afe3ba75d68e2",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
