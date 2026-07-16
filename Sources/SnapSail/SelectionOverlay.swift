@@ -282,8 +282,13 @@ final class SelectionOverlayView: NSView {
 
             SnapSailStyle.selectionFill.setFill()
             region.fill()
-            SnapSailStyle.accent.setStroke()
             let border = NSBezierPath(rect: region.insetBy(dx: 1, dy: 1))
+            for (width, alpha) in [(CGFloat(14), CGFloat(0.11)), (CGFloat(7), CGFloat(0.24))] {
+                SnapSailStyle.accent.withAlphaComponent(alpha).setStroke()
+                border.lineWidth = width
+                border.stroke()
+            }
+            SnapSailStyle.accent.setStroke()
             border.lineWidth = 2
             NSGraphicsContext.saveGraphicsState()
             let shadow = NSShadow()

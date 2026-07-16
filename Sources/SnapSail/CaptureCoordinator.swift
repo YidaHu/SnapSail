@@ -1,5 +1,6 @@
 import AppKit
 import Carbon.HIToolbox
+import SnapSailCore
 
 final class CaptureCoordinator {
     private let preferences = AppPreferences.shared
@@ -60,7 +61,8 @@ final class CaptureCoordinator {
                             annotations: outcome.annotations,
                             selectionPointSize: outcome.selectionPointSize
                         ) {
-                    self.finishCapture(rendered, action: action)
+                    let shadowed = ScreenshotShadowRenderer.render(rendered) ?? rendered
+                    self.finishCapture(shadowed, action: action)
                 }
                 else { self.showCaptureFailure() }
             }
@@ -88,7 +90,9 @@ final class CaptureCoordinator {
     private func startScrolling(rect: CGRect) {
         let controller = ScrollCaptureController(rect: rect, captureService: captureService) { [weak self] image in
             self?.scrollController = nil
-            if let image { self?.finishCapture(image, action: .copy) }
+            if let image {
+                self?.finishCapture(ScreenshotShadowRenderer.render(image) ?? image, action: .copy)
+            }
         }
         scrollController = controller
         controller.start()
