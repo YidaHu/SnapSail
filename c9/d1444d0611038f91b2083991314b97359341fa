@@ -1,0 +1,64 @@
+Sources/SnapSailCore/KeyboardShortcut.swift
+  s_806fcff206d472::t_ba52e096c42c9a 37-49,96-104,114
+  s_806fcff206d472::t_048d89e814dc1a 30-32
+Tests/SnapSailCoreTests/AppLocalizationTests.swift
+  s_806fcff206d472::t_0e762cd7dce1c1 1-22
+Sources/SnapSail/AppPreferences.swift
+  s_806fcff206d472::t_58592913f9ed95 26,117-119
+  s_806fcff206d472::t_6330c6d25556a7 55-56
+  s_806fcff206d472::t_7f30d7afb1ce8d 120-121
+Sources/SnapSail/ShortcutRecorderButton.swift
+  s_806fcff206d472::t_ba52e096c42c9a 55,63,67-69,71-73
+  s_806fcff206d472::t_439842fdacd668 18,36,60,70,83,124-126
+Sources/SnapSail/EditorWindowController.swift
+  s_806fcff206d472::t_dc7896792b7224 210-215
+  s_806fcff206d472::t_94e90190e4cbf0 194
+  s_806fcff206d472::t_082b82ab843244 25,70,91,96,101,106,108,230
+Tests/SnapSailCoreTests/KeyboardShortcutTests.swift
+  s_806fcff206d472::t_c26df29a12234b 39-46
+  s_806fcff206d472::t_048d89e814dc1a 21
+  s_806fcff206d472::t_cdfe549fc19bdf 47
+Sources/SnapSail/L10n.swift
+  s_806fcff206d472::t_58592913f9ed95 1-7
+README.md
+  s_806fcff206d472::t_cf2769358ce094 20,28
+  s_806fcff206d472::t_19a4d1cea1ebdf 30-35
+  s_806fcff206d472::t_2eace4da3eaed6 29
+Sources/SnapSailCore/AppLocalization.swift
+  s_806fcff206d472::t_bbccd61df43f14 1-142
+Sources/SnapSail/ScrollCaptureController.swift
+  s_806fcff206d472::t_e99af77ef2af28 84,89,92,96-97,99,102,132,137,154,162,167
+Sources/SnapSail/InlineCaptureToolbar.swift
+  s_806fcff206d472::t_dc0c7a3ab4f842 60-68,82,87,92,97,104,106,108
+Sources/SnapSail/AnnotationCanvasView.swift
+  s_806fcff206d472::t_dc0c7a3ab4f842 16-24,140,142,144-145
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_58592913f9ed95 17-20
+  s_806fcff206d472::t_5c0d7802cab2b9 200-203,214-215
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_dc0c7a3ab4f842 210,555,645-646
+Sources/SnapSail/History.swift
+  s_806fcff206d472::t_082b82ab843244 65,99-101,114,126,129
+Sources/SnapSail/SettingsWindowController.swift
+  s_806fcff206d472::t_3a614a8a176789 209,230,241-253,357,361,370,373
+  s_806fcff206d472::t_f041dfc85ecdf9 10-14,31,34,47,52-53,57,64,84-88,116-125,129-133,137-140,144,149,160,165,172,176,180-184
+Sources/SnapSail/MenuBarController.swift
+  s_806fcff206d472::t_58592913f9ed95 25-27,35-36,39,43,61-66,85
+  s_806fcff206d472::t_ba52e096c42c9a 51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "c9d1444d0611038f91b2083991314b97359341fa",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
