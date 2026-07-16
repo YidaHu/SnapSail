@@ -77,3 +77,44 @@ git add Sources/SnapSail/DesignSystem.swift Sources/SnapSail/InlineCaptureToolba
 git commit -m "feat: match capture toolbar to product page"
 ```
 
+### Task 2: Match the product-page icon language
+
+**Files:**
+- Modify: `Tests/SnapSailCoreTests/InlineCaptureToolbarTests.swift`
+- Modify: `Sources/SnapSail/InlineCaptureToolbar.swift`
+
+- [ ] **Step 1: Write a failing icon-map test**
+
+Compare each identified button image with `SnapSailStyle.symbol(_:size:weight:)` using the approved symbol map. Require `capture.copy` to equal `checkmark`, `capture.save` to equal `arrow.down.to.line`, and `capture.scroll` to equal `rectangle.and.hand.point.up.left`.
+
+- [ ] **Step 2: Run the focused test and verify RED**
+
+Run: `swift test -j 1 --filter InlineCaptureToolbarTests/testUsesProductPageSymbolMap`
+
+Expected: FAIL because the current copy button uses `doc.on.doc.fill`, save uses `tray.and.arrow.down`, and several annotation controls still use the old symbols.
+
+- [ ] **Step 3: Replace only the symbol names**
+
+Use this exact mapping in `buildButtons()`:
+
+```swift
+(.pen, "pencil")
+(.text, "character")
+(.number, "1.circle")
+color: "square.inset.filled"
+scroll: "rectangle.and.hand.point.up.left"
+save: "arrow.down.to.line"
+copy: "checkmark"
+```
+
+Do not change identifiers, targets, actions, roles, tooltips, order, frames, or callbacks.
+
+- [ ] **Step 4: Run focused and complete verification**
+
+Run: `swift test -j 1 --filter InlineCaptureToolbarTests`
+
+Expected: all toolbar tests pass.
+
+Run: `swift test -j 1 && zsh Scripts/build-app.sh`
+
+Expected: the complete test suite passes and `build/SnapSail.app` is produced.
