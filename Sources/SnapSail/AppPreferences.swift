@@ -23,6 +23,7 @@ final class AppPreferences {
         static let saveDirectory = "saveDirectory"
         static let filenamePrefix = "filenamePrefix"
         static let historyEnabled = "historyEnabled"
+        static let language = "language"
 
         static func shortcutKeyCode(_ action: CaptureShortcutAction) -> String {
             "shortcut.\(action.rawValue).keyCode"
@@ -51,7 +52,8 @@ final class AppPreferences {
             Key.saveAfterCapture: false,
             Key.saveDirectory: FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first?.path ?? NSHomeDirectory(),
             Key.filenamePrefix: "SnapSail",
-            Key.historyEnabled: true
+            Key.historyEnabled: true,
+            Key.language: AppLanguage.english.rawValue
         ]
         for action in CaptureShortcutAction.allCases {
             let shortcut = action.defaultShortcut
@@ -110,6 +112,11 @@ final class AppPreferences {
     var historyEnabled: Bool {
         get { defaults.bool(forKey: Key.historyEnabled) }
         set { defaults.set(newValue, forKey: Key.historyEnabled) }
+    }
+
+    var language: AppLanguage {
+        get { AppLanguage(rawValue: defaults.string(forKey: Key.language) ?? "english") ?? .english }
+        set { defaults.set(newValue.rawValue, forKey: Key.language) }
     }
 
     func shortcut(for action: CaptureShortcutAction) -> KeyboardShortcut {

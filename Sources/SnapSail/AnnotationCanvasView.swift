@@ -13,15 +13,15 @@ enum AnnotationTool: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .arrow: return "Arrow"
-        case .line: return "Line"
-        case .rectangle: return "Rectangle"
-        case .ellipse: return "Ellipse"
-        case .pen: return "Pen"
-        case .text: return "Text"
-        case .highlight: return "Highlight"
-        case .pixelate: return "Pixelate"
-        case .number: return "Number"
+        case .arrow: return L10n.text(.arrow)
+        case .line: return L10n.text(.line)
+        case .rectangle: return L10n.text(.rectangle)
+        case .ellipse: return L10n.text(.ellipse)
+        case .pen: return L10n.text(.pen)
+        case .text: return L10n.text(.text)
+        case .highlight: return L10n.text(.highlight)
+        case .pixelate: return L10n.text(.pixelate)
+        case .number: return L10n.text(.number)
         }
     }
 
@@ -137,12 +137,12 @@ final class AnnotationCanvasView: NSView {
         self.draft = nil
         if draft.tool == .text {
             let alert = NSAlert()
-            alert.messageText = "Add Text"
+            alert.messageText = L10n.text(.addText)
             let field = NSTextField(frame: CGRect(x: 0, y: 0, width: 260, height: 24))
-            field.placeholderString = "Enter annotation text"
+            field.placeholderString = L10n.text(.annotationPlaceholder)
             alert.accessoryView = field
-            alert.addButton(withTitle: "Add")
-            alert.addButton(withTitle: "Cancel")
+            alert.addButton(withTitle: L10n.text(.add))
+            alert.addButton(withTitle: L10n.text(.cancel))
             if alert.runModal() == .alertFirstButtonReturn, !field.stringValue.isEmpty {
                 draft.text = field.stringValue
                 commit(draft)

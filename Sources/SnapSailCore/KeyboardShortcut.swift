@@ -26,12 +26,25 @@ public struct KeyboardShortcut: Equatable, Hashable {
 
     public var displayString: String {
         var parts: [String] = []
-        if modifiers.contains(.control) { parts.append("⌃") }
-        if modifiers.contains(.option) { parts.append("⌥") }
-        if modifiers.contains(.shift) { parts.append("⇧") }
         if modifiers.contains(.command) { parts.append("⌘") }
+        if modifiers.contains(.shift) { parts.append("⇧") }
+        if modifiers.contains(.option) { parts.append("⌥") }
+        if modifiers.contains(.control) { parts.append("⌃") }
         parts.append(keyDisplay)
         return parts.joined(separator: " ")
+    }
+
+    public var isValidGlobalShortcut: Bool {
+        !modifiers.isEmpty || ShortcutKeyLabel.functionKeyNumber(keyCode: UInt16(keyCode)) != nil
+    }
+
+    public var menuKeyEquivalent: String {
+        if let functionNumber = ShortcutKeyLabel.functionKeyNumber(keyCode: UInt16(keyCode)),
+           let scalar = UnicodeScalar(0xF703 + functionNumber) {
+            return String(scalar)
+        }
+        if keyCode == 49 { return " " }
+        return keyDisplay.lowercased()
     }
 
     public func conflicts(
@@ -80,6 +93,15 @@ public enum CaptureShortcutAction: String, CaseIterable, Hashable {
 }
 
 public enum ShortcutKeyLabel {
+    public static func functionKeyNumber(keyCode: UInt16) -> Int? {
+        let functionKeys: [UInt16: Int] = [
+            122: 1, 120: 2, 99: 3, 118: 4, 96: 5, 97: 6, 98: 7, 100: 8,
+            101: 9, 109: 10, 103: 11, 111: 12, 105: 13, 107: 14, 113: 15,
+            106: 16, 64: 17, 79: 18, 80: 19, 90: 20
+        ]
+        return functionKeys[keyCode]
+    }
+
     public static func label(keyCode: UInt16, characters: String?) -> String? {
         let specialKeys: [UInt16: String] = [
             36: "Return", 48: "Tab", 49: "Space", 51: "Delete", 53: "Esc",
@@ -89,6 +111,7 @@ public enum ShortcutKeyLabel {
             115: "Home", 116: "Page Up", 117: "Forward Delete", 118: "F4", 119: "End",
             120: "F2", 121: "Page Down", 122: "F1", 123: "←", 124: "→", 125: "↓", 126: "↑"
         ]
+        if let functionNumber = functionKeyNumber(keyCode: keyCode) { return "F\(functionNumber)" }
         if let special = specialKeys[keyCode] { return special }
 
         let modifierKeyCodes: Set<UInt16> = [54, 55, 56, 57, 58, 59, 60, 61, 62, 63]

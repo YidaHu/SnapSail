@@ -18,7 +18,7 @@ final class KeyboardShortcutTests: XCTestCase {
             keyDisplay: "R"
         )
 
-        XCTAssertEqual(shortcut.displayString, "⌃ ⌥ ⇧ ⌘ R")
+        XCTAssertEqual(shortcut.displayString, "⌘ ⇧ ⌥ ⌃ R")
     }
 
     func testConflictIgnoresCurrentActionButFindsOtherActions() {
@@ -35,5 +35,14 @@ final class KeyboardShortcutTests: XCTestCase {
         XCTAssertEqual(ShortcutKeyLabel.label(keyCode: 49, characters: " "), "Space")
         XCTAssertEqual(ShortcutKeyLabel.label(keyCode: 122, characters: nil), "F1")
         XCTAssertNil(ShortcutKeyLabel.label(keyCode: 55, characters: nil))
+    }
+
+    func testFunctionKeysCanBeUsedWithoutModifiers() {
+        let f1 = KeyboardShortcut(keyCode: 122, modifiers: [], keyDisplay: "F1")
+        let letter = KeyboardShortcut(keyCode: 0, modifiers: [], keyDisplay: "A")
+
+        XCTAssertTrue(f1.isValidGlobalShortcut)
+        XCTAssertFalse(letter.isValidGlobalShortcut)
+        XCTAssertEqual(f1.menuKeyEquivalent, String(UnicodeScalar(0xF704)!))
     }
 }

@@ -22,7 +22,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "SnapSail Editor"
+        window.title = L10n.text(.editorTitle)
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.backgroundColor = NSColor(calibratedWhite: 0.12, alpha: 1)
@@ -67,7 +67,7 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
         separator.boxType = .separator
         toolbar.addSubview(separator)
 
-        let color = SymbolButton(symbol: "paintpalette", toolTip: "Color", target: self, action: #selector(chooseColor))
+        let color = SymbolButton(symbol: "paintpalette", toolTip: L10n.text(.color), target: self, action: #selector(chooseColor))
         color.frame = CGRect(x: x + 13, y: 11, width: 34, height: 34)
         toolbar.addSubview(color)
 
@@ -88,24 +88,24 @@ final class EditorWindowController: NSWindowController, NSWindowDelegate {
         bottom.autoresizingMask = [.width, .maxYMargin]
         content.addSubview(bottom)
 
-        let undo = SymbolButton(symbol: "arrow.uturn.backward", toolTip: "Undo", target: self, action: #selector(undo))
+        let undo = SymbolButton(symbol: "arrow.uturn.backward", toolTip: L10n.text(.undo), target: self, action: #selector(undo))
         undo.frame = CGRect(x: 16, y: 11, width: 34, height: 34)
         bottom.addSubview(undo)
         undoButton = undo
 
-        let redo = SymbolButton(symbol: "arrow.uturn.forward", toolTip: "Redo", target: self, action: #selector(redo))
+        let redo = SymbolButton(symbol: "arrow.uturn.forward", toolTip: L10n.text(.redo), target: self, action: #selector(redo))
         redo.frame = CGRect(x: 54, y: 11, width: 34, height: 34)
         bottom.addSubview(redo)
         redoButton = redo
 
-        let save = PrimaryButton(title: "Save…", target: self, action: #selector(save))
+        let save = PrimaryButton(title: L10n.text(.save), target: self, action: #selector(save))
         save.frame = CGRect(x: size.width - 104, y: 13, width: 88, height: 30)
         bottom.addSubview(save)
         save.autoresizingMask = [.minXMargin]
 
-        let copy = actionButton("Copy", symbol: "doc.on.doc", action: #selector(copyImage), x: size.width - 198, to: bottom)
+        let copy = actionButton(L10n.text(.copy), symbol: "doc.on.doc", action: #selector(copyImage), x: size.width - 198, to: bottom)
         copy.autoresizingMask = [.minXMargin]
-        let pin = actionButton("Pin", symbol: "pin", action: #selector(pinImage), x: size.width - 280, to: bottom)
+        let pin = actionButton(L10n.text(.pin), symbol: "pin", action: #selector(pinImage), x: size.width - 280, to: bottom)
         pin.autoresizingMask = [.minXMargin]
         updateUndoButtons()
     }
@@ -191,6 +191,7 @@ final class PinWindowController: NSObject, NSWindowDelegate {
         )
         window.level = .floating
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        window.isReleasedWhenClosed = false
         window.isMovableByWindowBackground = true
         window.hasShadow = true
         window.backgroundColor = .clear
@@ -206,7 +207,12 @@ final class PinWindowController: NSObject, NSWindowDelegate {
     }
 
     func show() { window?.makeKeyAndOrderFront(nil) }
-    func windowWillClose(_ notification: Notification) { onClose(self) }
+    func windowWillClose(_ notification: Notification) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.onClose(self)
+        }
+    }
 }
 
 private final class PinImageView: NSImageView {
@@ -221,7 +227,7 @@ private final class PinImageView: NSImageView {
 
     override func rightMouseDown(with event: NSEvent) {
         let menu = NSMenu()
-        let close = NSMenuItem(title: "Close Pinned Image", action: #selector(closeWindow), keyEquivalent: "")
+        let close = NSMenuItem(title: L10n.text(.closePinnedImage), action: #selector(closeWindow), keyEquivalent: "")
         close.target = self
         menu.addItem(close)
         NSMenu.popUpContextMenu(menu, with: event, for: self)

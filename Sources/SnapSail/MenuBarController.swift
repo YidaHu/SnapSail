@@ -22,9 +22,9 @@ final class MenuBarController: NSObject {
 
     private func makeMenu() -> NSMenu {
         let menu = NSMenu(title: "SnapSail")
-        let area = item("Capture Area", symbol: "viewfinder", action: #selector(captureArea), key: "2", modifiers: [.command, .shift])
-        let window = item("Capture Window", symbol: "macwindow", action: #selector(captureWindow), key: "3", modifiers: [.command, .shift])
-        let scrolling = item("Scrolling Capture", symbol: "arrow.down.to.line.compact", action: #selector(scrollingCapture), key: "4", modifiers: [.command, .shift])
+        let area = item(L10n.text(.captureArea), symbol: "viewfinder", action: #selector(captureArea), key: "2", modifiers: [.command, .shift])
+        let window = item(L10n.text(.captureWindow), symbol: "macwindow", action: #selector(captureWindow), key: "3", modifiers: [.command, .shift])
+        let scrolling = item(L10n.text(.scrollingCapture), symbol: "arrow.down.to.line.compact", action: #selector(scrollingCapture), key: "4", modifiers: [.command, .shift])
         captureItems[.area] = area
         captureItems[.window] = window
         captureItems[.scrolling] = scrolling
@@ -32,15 +32,15 @@ final class MenuBarController: NSObject {
         menu.addItem(window)
         menu.addItem(scrolling)
         menu.addItem(.separator())
-        menu.addItem(item("Capture History", symbol: "clock.arrow.circlepath", action: #selector(showHistory), key: "h", modifiers: [.command]))
-        menu.addItem(item("Settings…", symbol: "gearshape", action: #selector(showSettings), key: ",", modifiers: [.command]))
+        menu.addItem(item(L10n.text(.captureHistory), symbol: "clock.arrow.circlepath", action: #selector(showHistory), key: "h", modifiers: [.command]))
+        menu.addItem(item(L10n.text(.settings), symbol: "gearshape", action: #selector(showSettings), key: ",", modifiers: [.command]))
         menu.addItem(.separator())
 
-        let about = NSMenuItem(title: "About SnapSail", action: #selector(showAbout), keyEquivalent: "")
+        let about = NSMenuItem(title: L10n.text(.about), action: #selector(showAbout), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
 
-        let quit = NSMenuItem(title: "Quit SnapSail", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let quit = NSMenuItem(title: L10n.text(.quit), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         menu.addItem(quit)
         return menu
     }
@@ -48,7 +48,7 @@ final class MenuBarController: NSObject {
     func updateShortcuts(_ shortcuts: [CaptureShortcutAction: KeyboardShortcut]) {
         for (action, shortcut) in shortcuts {
             guard let item = captureItems[action] else { continue }
-            item.keyEquivalent = shortcut.keyDisplay.lowercased()
+            item.keyEquivalent = shortcut.menuKeyEquivalent
             var flags: NSEvent.ModifierFlags = []
             if shortcut.modifiers.contains(.command) { flags.insert(.command) }
             if shortcut.modifiers.contains(.shift) { flags.insert(.shift) }
@@ -56,6 +56,12 @@ final class MenuBarController: NSObject {
             if shortcut.modifiers.contains(.control) { flags.insert(.control) }
             item.keyEquivalentModifierMask = flags
         }
+    }
+
+    func updateLanguage(shortcuts: [CaptureShortcutAction: KeyboardShortcut]) {
+        captureItems.removeAll()
+        statusItem.menu = makeMenu()
+        updateShortcuts(shortcuts)
     }
 
     private func item(_ title: String, symbol: String, action: Selector, key: String, modifiers: NSEvent.ModifierFlags) -> NSMenuItem {
@@ -76,7 +82,7 @@ final class MenuBarController: NSObject {
         NSApplication.shared.orderFrontStandardAboutPanel(options: [
             .applicationName: "SnapSail",
             .applicationVersion: "0.1.0",
-            .credits: NSAttributedString(string: "Capture More. Scroll Less.")
+            .credits: NSAttributedString(string: L10n.text(.tagline))
         ])
         NSApplication.shared.activate(ignoringOtherApps: true)
     }

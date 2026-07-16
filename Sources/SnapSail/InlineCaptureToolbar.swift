@@ -57,15 +57,15 @@ final class InlineCaptureToolbar: NSView {
 
     private func buildButtons() {
         let tools: [(InlineAnnotationTool, String, String)] = [
-            (.rectangle, "rectangle", "Rectangle"),
-            (.ellipse, "circle", "Ellipse"),
-            (.line, "line.diagonal", "Line"),
-            (.arrow, "arrow.up.right", "Arrow"),
-            (.pen, "pencil.tip", "Pen"),
-            (.pixelate, "square.grid.3x3", "Pixelate"),
-            (.text, "textformat", "Text"),
-            (.number, "1.circle.fill", "Number"),
-            (.highlight, "highlighter", "Highlight")
+            (.rectangle, "rectangle", L10n.text(.rectangle)),
+            (.ellipse, "circle", L10n.text(.ellipse)),
+            (.line, "line.diagonal", L10n.text(.line)),
+            (.arrow, "arrow.up.right", L10n.text(.arrow)),
+            (.pen, "pencil.tip", L10n.text(.pen)),
+            (.pixelate, "square.grid.3x3", L10n.text(.pixelate)),
+            (.text, "textformat", L10n.text(.text)),
+            (.number, "1.circle.fill", L10n.text(.number)),
+            (.highlight, "highlighter", L10n.text(.highlight))
         ]
 
         var x: CGFloat = 14
@@ -79,33 +79,33 @@ final class InlineCaptureToolbar: NSView {
         addSeparator(x: x + 2)
         x += 14
 
-        let color = addButton(symbol: "paintpalette.fill", title: "Change Color", x: x, action: #selector(cycleColor))
+        let color = addButton(symbol: "paintpalette.fill", title: L10n.text(.changeColor), x: x, action: #selector(cycleColor))
         color.accentColor = nsColor(colors[colorIndex])
         colorButton = color
         x += 40
 
-        let undo = addButton(symbol: "arrow.uturn.backward", title: "Undo", x: x, action: #selector(undo))
+        let undo = addButton(symbol: "arrow.uturn.backward", title: L10n.text(.undo), x: x, action: #selector(undo))
         undo.isEnabled = false
         undoButton = undo
         x += 40
 
-        let redo = addButton(symbol: "arrow.uturn.forward", title: "Redo", x: x, action: #selector(redo))
+        let redo = addButton(symbol: "arrow.uturn.forward", title: L10n.text(.redo), x: x, action: #selector(redo))
         redo.isEnabled = false
         redoButton = redo
         x += 40
 
-        let cancel = addButton(symbol: "xmark", title: "Cancel", x: x, action: #selector(cancel))
+        let cancel = addButton(symbol: "xmark", title: L10n.text(.cancel), x: x, action: #selector(cancel))
         cancel.accentColor = .systemRed
         x += 40
 
         addSeparator(x: x + 2)
         x += 14
 
-        _ = addButton(symbol: "arrow.down.to.line.compact", title: "Scrolling Capture", x: x, action: #selector(startScrollingCapture))
+        _ = addButton(symbol: "arrow.down.to.line.compact", title: L10n.text(.scrollingCapture), x: x, action: #selector(startScrollingCapture))
         x += 40
-        _ = addButton(symbol: "tray.and.arrow.down", title: "Save and Copy", x: x, action: #selector(save))
+        _ = addButton(symbol: "tray.and.arrow.down", title: L10n.text(.saveAndCopy), x: x, action: #selector(save))
         x += 40
-        let copy = addButton(symbol: "doc.on.doc.fill", title: "Copy and Finish", x: x, action: #selector(copyImage))
+        let copy = addButton(symbol: "doc.on.doc.fill", title: L10n.text(.copyAndFinish), x: x, action: #selector(copyImage))
         copy.isEmphasized = true
     }
 

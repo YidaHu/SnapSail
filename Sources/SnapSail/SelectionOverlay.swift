@@ -207,7 +207,7 @@ final class SelectionOverlayView: NSView {
     private var selection: SelectionModel
     private var interaction: RegionInteraction = .idle
     private let toolbar = InlineCaptureToolbar(frame: CGRect(origin: .zero, size: InlineCaptureToolbar.preferredSize))
-    private let pinButton = CircularSymbolButton(symbol: "pin.fill", toolTip: "Pin on Screen", target: nil, action: nil)
+    private let pinButton = CircularSymbolButton(symbol: "pin.fill", toolTip: L10n.text(.pinOnScreen), target: nil, action: nil)
     private let sizeLabel = MeasurementPillView(frame: CGRect(x: 0, y: 0, width: 238, height: 50))
     private let loupe = SelectionLoupeView(frame: CGRect(x: 0, y: 0, width: 120, height: 86))
     private var annotationHistory = InlineAnnotationHistory()
@@ -552,7 +552,7 @@ final class SelectionOverlayView: NSView {
         textAnchor = normalized
         let width = min(220, max(100, bounds.maxX - point.x - 12))
         let field = NSTextField(frame: CGRect(x: point.x, y: point.y - 15, width: width, height: 30))
-        field.placeholderString = "Type and press Return"
+        field.placeholderString = L10n.text(.typeAndReturn)
         field.font = .systemFont(ofSize: 16, weight: .semibold)
         field.focusRingType = .none
         field.wantsLayer = true
@@ -642,8 +642,8 @@ final class SelectionOverlayView: NSView {
 
     private func drawInstruction() {
         let text = controller?.selectionMode == .window
-            ? "Click to select · Shift-click multiple · Space switches mode · Esc cancels"
-            : "Drag to select · Move or resize · Return captures · Space switches mode"
+            ? L10n.text(.windowInstruction)
+            : L10n.text(.regionInstruction)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 13, weight: .medium),
             .foregroundColor: NSColor.white

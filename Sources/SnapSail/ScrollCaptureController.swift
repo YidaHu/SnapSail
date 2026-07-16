@@ -81,25 +81,25 @@ final class ScrollCaptureController: NSObject {
 
     private func apply(result: ScrollAppendResult?, previewImage: CGImage?) {
         guard let result else {
-            statusLabel?.stringValue = "Capture unavailable. Check Screen Recording permission."
+            statusLabel?.stringValue = L10n.text(.scrollUnavailable)
             return
         }
         switch result {
         case .started(let height):
-            statusLabel?.stringValue = "Ready — scroll down slowly · \(height) px"
+            statusLabel?.stringValue = String(format: L10n.text(.scrollReady), height)
         case .appended(_, let totalHeight):
             failures = 0
-            statusLabel?.stringValue = "Stitching smoothly · \(totalHeight) px"
+            statusLabel?.stringValue = String(format: L10n.text(.scrollStitching), totalHeight)
         case .noMatch(let totalHeight):
             failures += 1
             statusLabel?.stringValue = failures > 4
-                ? "Paused — scroll more slowly · \(totalHeight) px saved"
-                : "Waiting for vertical movement · \(totalHeight) px"
+                ? String(format: L10n.text(.scrollPaused), totalHeight)
+                : String(format: L10n.text(.scrollWaiting), totalHeight)
         case .reachedMaximum(let totalHeight):
-            statusLabel?.stringValue = "Maximum height reached · \(totalHeight) px"
+            statusLabel?.stringValue = String(format: L10n.text(.scrollMaximum), totalHeight)
             finishCapture()
         case .incompatibleFrame(let totalHeight):
-            statusLabel?.stringValue = "Display changed · \(totalHeight) px saved"
+            statusLabel?.stringValue = String(format: L10n.text(.scrollDisplayChanged), totalHeight)
             finishCapture()
         }
         if let previewImage {
@@ -129,12 +129,12 @@ final class ScrollCaptureController: NSObject {
         let root = MaterialCardView(frame: CGRect(origin: CGPoint(x: 6, y: 8), size: NSSize(width: 240, height: 338)))
         root.autoresizingMask = [.width, .height]
 
-        let title = NSTextField(labelWithString: "Scrolling Capture")
+        let title = NSTextField(labelWithString: L10n.text(.scrollingCapture))
         title.frame = CGRect(x: 16, y: 300, width: 172, height: 22)
         title.font = .systemFont(ofSize: 14, weight: .semibold)
         root.addSubview(title)
 
-        let live = PillLabel(text: "LIVE", color: .systemGreen)
+        let live = PillLabel(text: L10n.text(.live), color: .systemGreen)
         live.frame = CGRect(x: 188, y: 302, width: 36, height: 18)
         live.font = .monospacedDigitSystemFont(ofSize: 9, weight: .bold)
         root.addSubview(live)
@@ -151,7 +151,7 @@ final class ScrollCaptureController: NSObject {
         preview.autoresizingMask = [.width, .height]
         previewContainer.addSubview(preview)
 
-        let status = NSTextField(labelWithString: "Starting capture…")
+        let status = NSTextField(labelWithString: L10n.text(.startingCapture))
         status.frame = CGRect(x: 14, y: 48, width: 212, height: 18)
         status.alignment = .center
         status.font = .systemFont(ofSize: 11, weight: .medium)
@@ -159,12 +159,12 @@ final class ScrollCaptureController: NSObject {
         status.lineBreakMode = .byTruncatingMiddle
         root.addSubview(status)
 
-        let finish = PrimaryButton(title: "Finish", target: self, action: #selector(finishCapture))
+        let finish = PrimaryButton(title: L10n.text(.finish), target: self, action: #selector(finishCapture))
         finish.frame = CGRect(x: 116, y: 12, width: 108, height: 30)
         finish.keyEquivalent = "\r"
         root.addSubview(finish)
 
-        let cancel = SymbolButton(symbol: "xmark", toolTip: "Cancel", target: self, action: #selector(cancelCapture))
+        let cancel = SymbolButton(symbol: "xmark", toolTip: L10n.text(.cancel), target: self, action: #selector(cancelCapture))
         cancel.frame = CGRect(x: 14, y: 11, width: 32, height: 32)
         cancel.keyEquivalent = "\u{1b}"
         root.addSubview(cancel)

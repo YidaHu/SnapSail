@@ -62,7 +62,7 @@ final class HistoryWindowController: NSWindowController, NSTableViewDataSource, 
             backing: .buffered,
             defer: false
         )
-        window.title = "Capture History"
+        window.title = L10n.text(.historyTitle)
         window.center()
         super.init(window: window)
         buildInterface()
@@ -96,9 +96,9 @@ final class HistoryWindowController: NSWindowController, NSTableViewDataSource, 
 
     @objc private func clearHistory() {
         let alert = NSAlert()
-        alert.messageText = "Clear Capture History?"
-        alert.addButton(withTitle: "Clear")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = L10n.text(.clearHistoryQuestion)
+        alert.addButton(withTitle: L10n.text(.clear))
+        alert.addButton(withTitle: L10n.text(.cancel))
         guard alert.runModal() == .alertFirstButtonReturn else { return }
         store.clear()
         urls = []
@@ -111,7 +111,7 @@ final class HistoryWindowController: NSWindowController, NSTableViewDataSource, 
         scroll.autoresizingMask = [.width, .height]
         scroll.hasVerticalScroller = true
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("capture"))
-        column.title = "Recent Captures"
+        column.title = L10n.text(.recentCaptures)
         column.width = 580
         table.addTableColumn(column)
         table.headerView = nil
@@ -123,10 +123,10 @@ final class HistoryWindowController: NSWindowController, NSTableViewDataSource, 
         scroll.documentView = table
         content.addSubview(scroll)
 
-        let open = NSButton(title: "Open", target: self, action: #selector(openSelected))
+        let open = NSButton(title: L10n.text(.open), target: self, action: #selector(openSelected))
         open.frame = CGRect(x: 12, y: 12, width: 80, height: 30)
         content.addSubview(open)
-        let clear = NSButton(title: "Clear History", target: self, action: #selector(clearHistory))
+        let clear = NSButton(title: L10n.text(.clearHistory), target: self, action: #selector(clearHistory))
         clear.frame = CGRect(x: 98, y: 12, width: 110, height: 30)
         content.addSubview(clear)
     }

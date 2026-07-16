@@ -14,6 +14,10 @@ final class CaptureCoordinator {
         preferences: preferences,
         onShortcutChange: { [weak self] action, shortcut in
             self?.replaceShortcut(shortcut, for: action) ?? false
+        },
+        onLanguageChange: { [weak self] in
+            guard let self else { return }
+            self.menuBar?.updateLanguage(shortcuts: self.preferences.shortcuts)
         }
     )
     private lazy var historyStore = HistoryStore()
@@ -193,10 +197,10 @@ final class CaptureCoordinator {
         if requested { return true }
 
         let alert = NSAlert()
-        alert.messageText = "Screen Recording Permission Required"
-        alert.informativeText = "SnapSail needs Screen Recording access to capture your screen. Enable it in System Settings → Privacy & Security → Screen Recording, then relaunch SnapSail."
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = L10n.text(.permissionTitle)
+        alert.informativeText = L10n.text(.permissionBody)
+        alert.addButton(withTitle: L10n.text(.openSystemSettings))
+        alert.addButton(withTitle: L10n.text(.cancel))
         NSApplication.shared.activate(ignoringOtherApps: true)
         if alert.runModal() == .alertFirstButtonReturn,
            let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
@@ -207,8 +211,8 @@ final class CaptureCoordinator {
 
     private func showCaptureFailure() {
         let alert = NSAlert()
-        alert.messageText = "Capture Failed"
-        alert.informativeText = "SnapSail could not capture this content. Check Screen Recording permission and try again."
+        alert.messageText = L10n.text(.captureFailed)
+        alert.informativeText = L10n.text(.captureFailedBody)
         alert.runModal()
     }
 }

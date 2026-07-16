@@ -15,7 +15,7 @@ final class ShortcutRecorderButton: NSButton {
         bezelStyle = .rounded
         focusRingType = .none
         font = .monospacedSystemFont(ofSize: 12, weight: .semibold)
-        toolTip = "Click, then press a shortcut. Delete restores the default."
+        toolTip = L10n.text(.recorderTooltip)
         setAccessibilityLabel("\(action.accessibilityTitle) shortcut")
         updateTitle()
     }
@@ -33,7 +33,7 @@ final class ShortcutRecorderButton: NSButton {
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
         isRecording = true
-        title = "Press shortcut…"
+        title = L10n.text(.pressShortcut)
         needsDisplay = true
     }
 
@@ -52,20 +52,25 @@ final class ShortcutRecorderButton: NSButton {
         }
 
         let modifiers = shortcutModifiers(from: event.modifierFlags)
-        guard !modifiers.isEmpty,
-              let keyDisplay = ShortcutKeyLabel.label(
+        guard let keyDisplay = ShortcutKeyLabel.label(
                 keyCode: event.keyCode,
                 characters: event.charactersIgnoringModifiers
               ) else {
             NSSound.beep()
-            title = "Add a modifier"
+            title = L10n.text(.pressKey)
             return
         }
-        propose(KeyboardShortcut(
+        let candidate = KeyboardShortcut(
             keyCode: UInt32(event.keyCode),
             modifiers: modifiers,
             keyDisplay: keyDisplay
-        ))
+        )
+        guard candidate.isValidGlobalShortcut else {
+            NSSound.beep()
+            title = L10n.text(.addModifier)
+            return
+        }
+        propose(candidate)
     }
 
     override func flagsChanged(with event: NSEvent) {
@@ -75,7 +80,7 @@ final class ShortcutRecorderButton: NSButton {
         }
         let modifiers = shortcutModifiers(from: event.modifierFlags)
         let preview = KeyboardShortcut(keyCode: 0, modifiers: modifiers, keyDisplay: "…")
-        title = modifiers.isEmpty ? "Press shortcut…" : preview.displayString
+        title = modifiers.isEmpty ? L10n.text(.pressShortcut) : preview.displayString
     }
 
     override func resignFirstResponder() -> Bool {
@@ -116,9 +121,9 @@ final class ShortcutRecorderButton: NSButton {
 private extension CaptureShortcutAction {
     var accessibilityTitle: String {
         switch self {
-        case .area: return "Capture Area"
-        case .window: return "Capture Window"
-        case .scrolling: return "Scrolling Capture"
+        case .area: return L10n.text(.captureArea)
+        case .window: return L10n.text(.captureWindow)
+        case .scrolling: return L10n.text(.scrollingCapture)
         }
     }
 }
