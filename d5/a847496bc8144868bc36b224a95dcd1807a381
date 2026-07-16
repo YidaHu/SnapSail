@@ -1,0 +1,26 @@
+Sources/SnapSailCore/ScreenshotShadowRenderer.swift
+  s_806fcff206d472::t_42be624cd0a8bb 1-42
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_e098d044b97777 286-291
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_e098d044b97777 64-65,93-95
+  s_806fcff206d472::t_6c19fd47a537b9 3
+Tests/SnapSailCoreTests/ScreenshotShadowRendererTests.swift
+  s_806fcff206d472::t_36c81c66e126ce 1-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "d5a847496bc8144868bc36b224a95dcd1807a381",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
