@@ -1,0 +1,21 @@
+Scripts/build-app.sh
+  s_806fcff206d472::t_fc76573a2e68d6 10-16,24
+Tests/SnapSailCoreTests/BuildScriptTests.swift
+  s_806fcff206d472::t_5a370e7e5a7025 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "6b2d5ce53522841c009a39679e18d61376240c41",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
