@@ -1,0 +1,26 @@
+Sources/SnapSail/ShortcutRecorderButton.swift
+  s_806fcff206d472::t_5ead5f2aa8d881 1-59,61-87,89-124
+  s_806fcff206d472::t_7d838bedaa32a9 60,88
+Sources/SnapSail/SettingsWindowController.swift
+  s_806fcff206d472::t_5ead5f2aa8d881 45,166-169,214-216,297-304,316-345
+Sources/SnapSailCore/KeyboardShortcut.swift
+  s_806fcff206d472::t_0e3961d342601d 81-98
+Tests/SnapSailCoreTests/KeyboardShortcutTests.swift
+  s_806fcff206d472::t_c8639d15a46ac4 32-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "59ca5931e57b8c0cf64aa447700db16b473875e6",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
