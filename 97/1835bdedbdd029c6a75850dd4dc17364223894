@@ -1,0 +1,27 @@
+Sources/SnapSail/InlineCaptureToolbar.swift
+  s_806fcff206d472::t_c60787e6f4c1a5 8-12,14-15,200,202,257,265
+Sources/SnapSail/DesignSystem.swift
+  s_806fcff206d472::t_c60787e6f4c1a5 7-8,182-183,193,195-197,200,205,209,216-217,225-228
+Sources/SnapSail/SelectionOverlay.swift
+  s_806fcff206d472::t_c60787e6f4c1a5 220-222,476-480,482,484-485
+Tests/SnapSailCoreTests/InlineCaptureToolbarTests.swift
+  s_806fcff206d472::t_c60787e6f4c1a5 10-11,14,19-20,78
+Tests/SnapSailCoreTests/MeasurementPillViewTests.swift
+  s_806fcff206d472::t_5da8469bafcfe5 1-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "971835bdedbdd029c6a75850dd4dc17364223894",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
