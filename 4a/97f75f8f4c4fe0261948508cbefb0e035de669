@@ -1,0 +1,19 @@
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_a7c8f1e21a4a2f 122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "4a97f75f8f4c4fe0261948508cbefb0e035de669",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
