@@ -52,6 +52,38 @@ final class InlineCaptureToolbarTests: XCTestCase {
         XCTAssertEqual(toolbar.subviews.compactMap { $0 as? NSButton }.count, 16)
     }
 
+    func testUsesProductPageSymbolMap() throws {
+        let toolbar = makeToolbar()
+        let symbols = [
+            ("capture.tool.rectangle", "rectangle"),
+            ("capture.tool.ellipse", "circle"),
+            ("capture.tool.line", "line.diagonal"),
+            ("capture.tool.arrow", "arrow.up.right"),
+            ("capture.tool.pen", "pencil"),
+            ("capture.tool.pixelate", "square.grid.3x3"),
+            ("capture.tool.text", "character"),
+            ("capture.tool.number", "1.circle"),
+            ("capture.tool.highlight", "highlighter"),
+            ("capture.color", "square.inset.filled"),
+            ("capture.undo", "arrow.uturn.backward"),
+            ("capture.redo", "arrow.uturn.forward"),
+            ("capture.cancel", "xmark"),
+            ("capture.scroll", "rectangle.and.hand.point.up.left"),
+            ("capture.save", "arrow.down.to.line"),
+            ("capture.copy", "checkmark")
+        ]
+
+        for (identifier, symbolName) in symbols {
+            let actual = try XCTUnwrap(try button(identifier: identifier, in: toolbar).image)
+            let expected = try XCTUnwrap(SnapSailStyle.symbol(symbolName, size: 20, weight: .medium))
+            XCTAssertEqual(
+                actual.tiffRepresentation,
+                expected.tiffRepresentation,
+                "\(identifier) should use the \(symbolName) symbol"
+            )
+        }
+    }
+
     private func makeToolbar() -> InlineCaptureToolbar {
         InlineCaptureToolbar(frame: CGRect(origin: .zero, size: InlineCaptureToolbar.preferredSize))
     }

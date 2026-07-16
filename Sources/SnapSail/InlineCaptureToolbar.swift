@@ -71,10 +71,10 @@ final class InlineCaptureToolbar: NSView {
             (.ellipse, "circle", L10n.text(.ellipse), "ellipse"),
             (.line, "line.diagonal", L10n.text(.line), "line"),
             (.arrow, "arrow.up.right", L10n.text(.arrow), "arrow"),
-            (.pen, "pencil.tip", L10n.text(.pen), "pen"),
+            (.pen, "pencil", L10n.text(.pen), "pen"),
             (.pixelate, "square.grid.3x3", L10n.text(.pixelate), "pixelate"),
-            (.text, "textformat", L10n.text(.text), "text"),
-            (.number, "1.circle.fill", L10n.text(.number), "number"),
+            (.text, "character", L10n.text(.text), "text"),
+            (.number, "1.circle", L10n.text(.number), "number"),
             (.highlight, "highlighter", L10n.text(.highlight), "highlight")
         ]
 
@@ -96,7 +96,7 @@ final class InlineCaptureToolbar: NSView {
         addSeparator(at: &x)
 
         let color = addButton(
-            symbol: "paintpalette.fill",
+            symbol: "square.inset.filled",
             title: L10n.text(.changeColor),
             identifier: "capture.color",
             x: x,
@@ -142,7 +142,7 @@ final class InlineCaptureToolbar: NSView {
         addSeparator(at: &x)
 
         _ = addButton(
-            symbol: "arrow.down.to.line.compact",
+            symbol: "rectangle.and.hand.point.up.left",
             title: L10n.text(.scrollingCapture),
             identifier: "capture.scroll",
             x: x,
@@ -150,7 +150,7 @@ final class InlineCaptureToolbar: NSView {
         )
         advanceButton(at: &x)
         _ = addButton(
-            symbol: "tray.and.arrow.down",
+            symbol: "arrow.down.to.line",
             title: L10n.text(.saveAndCopy),
             identifier: "capture.save",
             x: x,
@@ -158,7 +158,7 @@ final class InlineCaptureToolbar: NSView {
         )
         advanceButton(at: &x)
         let copy = addButton(
-            symbol: "doc.on.doc.fill",
+            symbol: "checkmark",
             title: L10n.text(.copyAndFinish),
             identifier: "capture.copy",
             x: x,
