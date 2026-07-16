@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-07-16-inline-capture-workspace.md
+  s_806fcff206d472::t_521d99e2db8c52 1-156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9ae3122ee53472e43f0171ed5e289eb0250b55c8",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
