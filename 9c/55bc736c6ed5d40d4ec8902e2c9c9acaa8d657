@@ -1,0 +1,27 @@
+Sources/SnapSail/CaptureCoordinator.swift
+  s_806fcff206d472::t_a07824ddd64d8c 13-18,33-35,46-98
+  s_806fcff206d472::t_47dffe235dd85f 99
+Sources/SnapSail/SettingsWindowController.swift
+  s_806fcff206d472::t_a07824ddd64d8c 2,30,46-49,51
+Sources/SnapSail/AppPreferences.swift
+  s_806fcff206d472::t_a07824ddd64d8c 3,26-37,44,55-62,114-140
+Sources/SnapSail/MenuBarController.swift
+  s_806fcff206d472::t_a07824ddd64d8c 2,12,25-33,48-58
+  s_806fcff206d472::t_4dcf1e6542a1a9 59-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9c55bc736c6ed5d40d4ec8902e2c9c9acaa8d657",
+  "prompts": {},
+  "sessions": {
+    "s_806fcff206d472": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f68f9-e06d-7c21-9641-a20426d60133",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
