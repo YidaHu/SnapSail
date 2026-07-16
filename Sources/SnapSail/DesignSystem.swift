@@ -4,8 +4,18 @@ enum SnapSailStyle {
     static let accent = NSColor.systemBlue
     static let selectionFill = NSColor.systemBlue.withAlphaComponent(0.08)
     static let overlayDim = NSColor.black.withAlphaComponent(0.18)
-    static let captureToolbarBackground = NSColor(calibratedWhite: 0.985, alpha: 0.98)
-    static let captureToolbarForeground = NSColor(calibratedWhite: 0.22, alpha: 1)
+    static let captureToolbarSize = CGSize(width: 744, height: 62)
+    static let captureToolbarCornerRadius: CGFloat = 22
+    static let captureToolbarBackground = NSColor(calibratedWhite: 0.988, alpha: 0.985)
+    static let captureToolbarForeground = NSColor(calibratedWhite: 0.20, alpha: 1)
+    static let captureToolbarSelectionBackground = NSColor(
+        calibratedRed: 0.906,
+        green: 0.945,
+        blue: 1,
+        alpha: 1
+    )
+    static let captureToolbarHoverBackground = NSColor(calibratedWhite: 0.94, alpha: 1)
+    static let captureToolbarDestructiveHoverBackground = NSColor.systemRed.withAlphaComponent(0.10)
     static let cardCornerRadius: CGFloat = 11
     static let controlHeight: CGFloat = 30
     static let space8: CGFloat = 8

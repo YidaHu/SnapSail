@@ -2,7 +2,17 @@ import AppKit
 import SnapSailCore
 
 final class InlineCaptureToolbar: NSView {
-    static let preferredSize = CGSize(width: 700, height: 66)
+    static let preferredSize = SnapSailStyle.captureToolbarSize
+
+    private enum Metrics {
+        static let outerPadding: CGFloat = 12
+        static let buttonWidth: CGFloat = 40
+        static let buttonHeight: CGFloat = 42
+        static let buttonGap: CGFloat = 4
+        static let separatorLeadingSpace: CGFloat = 6
+        static let separatorWidth: CGFloat = 1
+        static let separatorTrailingSpace: CGFloat = 7
+    }
 
     var onToolSelected: ((InlineAnnotationTool?) -> Void)?
     var onColorChanged: ((InlineAnnotationColor) -> Void)?
@@ -33,13 +43,13 @@ final class InlineCaptureToolbar: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
         layer?.backgroundColor = SnapSailStyle.captureToolbarBackground.cgColor
-        layer?.cornerRadius = frameRect.height / 2
+        layer?.cornerRadius = SnapSailStyle.captureToolbarCornerRadius
         layer?.borderWidth = 0.5
-        layer?.borderColor = NSColor.black.withAlphaComponent(0.08).cgColor
+        layer?.borderColor = NSColor.black.withAlphaComponent(0.07).cgColor
         layer?.shadowColor = NSColor.black.cgColor
-        layer?.shadowOpacity = 0.24
-        layer?.shadowRadius = 16
-        layer?.shadowOffset = CGSize(width: 0, height: -5)
+        layer?.shadowOpacity = 0.20
+        layer?.shadowRadius = 18
+        layer?.shadowOffset = CGSize(width: 0, height: -7)
         buildButtons()
     }
 
@@ -56,72 +66,144 @@ final class InlineCaptureToolbar: NSView {
     }
 
     private func buildButtons() {
-        let tools: [(InlineAnnotationTool, String, String)] = [
-            (.rectangle, "rectangle", L10n.text(.rectangle)),
-            (.ellipse, "circle", L10n.text(.ellipse)),
-            (.line, "line.diagonal", L10n.text(.line)),
-            (.arrow, "arrow.up.right", L10n.text(.arrow)),
-            (.pen, "pencil.tip", L10n.text(.pen)),
-            (.pixelate, "square.grid.3x3", L10n.text(.pixelate)),
-            (.text, "textformat", L10n.text(.text)),
-            (.number, "1.circle.fill", L10n.text(.number)),
-            (.highlight, "highlighter", L10n.text(.highlight))
+        let tools: [(InlineAnnotationTool, String, String, String)] = [
+            (.rectangle, "rectangle", L10n.text(.rectangle), "rectangle"),
+            (.ellipse, "circle", L10n.text(.ellipse), "ellipse"),
+            (.line, "line.diagonal", L10n.text(.line), "line"),
+            (.arrow, "arrow.up.right", L10n.text(.arrow), "arrow"),
+            (.pen, "pencil.tip", L10n.text(.pen), "pen"),
+            (.pixelate, "square.grid.3x3", L10n.text(.pixelate), "pixelate"),
+            (.text, "textformat", L10n.text(.text), "text"),
+            (.number, "1.circle.fill", L10n.text(.number), "number"),
+            (.highlight, "highlighter", L10n.text(.highlight), "highlight")
         ]
 
-        var x: CGFloat = 14
-        for (tool, symbol, title) in tools {
-            let button = addButton(symbol: symbol, title: title, x: x, action: #selector(selectTool(_:)))
+        var x = Metrics.outerPadding
+        for (index, item) in tools.enumerated() {
+            let (tool, symbol, title, identifier) = item
+            let button = addButton(
+                symbol: symbol,
+                title: title,
+                identifier: "capture.tool.\(identifier)",
+                x: x,
+                action: #selector(selectTool(_:))
+            )
             button.tag = tool.rawValue
             toolButtons[tool] = button
-            x += 40
+            advanceButton(at: &x, addGap: index < tools.count - 1)
         }
 
-        addSeparator(x: x + 2)
-        x += 14
+        addSeparator(at: &x)
 
-        let color = addButton(symbol: "paintpalette.fill", title: L10n.text(.changeColor), x: x, action: #selector(cycleColor))
+        let color = addButton(
+            symbol: "paintpalette.fill",
+            title: L10n.text(.changeColor),
+            identifier: "capture.color",
+            x: x,
+            action: #selector(cycleColor)
+        )
         color.accentColor = nsColor(colors[colorIndex])
+        color.usesAccentTint = true
         colorButton = color
-        x += 40
+        advanceButton(at: &x)
 
-        let undo = addButton(symbol: "arrow.uturn.backward", title: L10n.text(.undo), x: x, action: #selector(undo))
+        let undo = addButton(
+            symbol: "arrow.uturn.backward",
+            title: L10n.text(.undo),
+            identifier: "capture.undo",
+            x: x,
+            action: #selector(undo)
+        )
         undo.isEnabled = false
         undoButton = undo
-        x += 40
+        advanceButton(at: &x)
 
-        let redo = addButton(symbol: "arrow.uturn.forward", title: L10n.text(.redo), x: x, action: #selector(redo))
+        let redo = addButton(
+            symbol: "arrow.uturn.forward",
+            title: L10n.text(.redo),
+            identifier: "capture.redo",
+            x: x,
+            action: #selector(redo)
+        )
         redo.isEnabled = false
         redoButton = redo
-        x += 40
+        advanceButton(at: &x)
 
-        let cancel = addButton(symbol: "xmark", title: L10n.text(.cancel), x: x, action: #selector(cancel))
-        cancel.accentColor = .systemRed
-        x += 40
+        let cancel = addButton(
+            symbol: "xmark",
+            title: L10n.text(.cancel),
+            identifier: "capture.cancel",
+            x: x,
+            action: #selector(cancel)
+        )
+        cancel.role = .destructive
+        advanceButton(at: &x, addGap: false)
 
-        addSeparator(x: x + 2)
-        x += 14
+        addSeparator(at: &x)
 
-        _ = addButton(symbol: "arrow.down.to.line.compact", title: L10n.text(.scrollingCapture), x: x, action: #selector(startScrollingCapture))
-        x += 40
-        _ = addButton(symbol: "tray.and.arrow.down", title: L10n.text(.saveAndCopy), x: x, action: #selector(save))
-        x += 40
-        let copy = addButton(symbol: "doc.on.doc.fill", title: L10n.text(.copyAndFinish), x: x, action: #selector(copyImage))
-        copy.isEmphasized = true
+        _ = addButton(
+            symbol: "arrow.down.to.line.compact",
+            title: L10n.text(.scrollingCapture),
+            identifier: "capture.scroll",
+            x: x,
+            action: #selector(startScrollingCapture)
+        )
+        advanceButton(at: &x)
+        _ = addButton(
+            symbol: "tray.and.arrow.down",
+            title: L10n.text(.saveAndCopy),
+            identifier: "capture.save",
+            x: x,
+            action: #selector(save)
+        )
+        advanceButton(at: &x)
+        let copy = addButton(
+            symbol: "doc.on.doc.fill",
+            title: L10n.text(.copyAndFinish),
+            identifier: "capture.copy",
+            x: x,
+            action: #selector(copyImage)
+        )
+        copy.role = .primary
     }
 
     @discardableResult
-    private func addButton(symbol: String, title: String, x: CGFloat, action: Selector) -> InlineToolbarButton {
+    private func addButton(
+        symbol: String,
+        title: String,
+        identifier: String,
+        x: CGFloat,
+        action: Selector
+    ) -> InlineToolbarButton {
         let button = InlineToolbarButton(symbol: symbol, title: title, target: self, action: action)
-        button.frame = CGRect(x: x, y: 11, width: 40, height: 44)
+        button.identifier = NSUserInterfaceItemIdentifier(identifier)
+        button.frame = CGRect(
+            x: x,
+            y: (Self.preferredSize.height - Metrics.buttonHeight) / 2,
+            width: Metrics.buttonWidth,
+            height: Metrics.buttonHeight
+        )
         addSubview(button)
         return button
     }
 
-    private func addSeparator(x: CGFloat) {
-        let separator = NSView(frame: CGRect(x: x, y: 17, width: 1, height: 32))
+    private func advanceButton(at x: inout CGFloat, addGap: Bool = true) {
+        x += Metrics.buttonWidth
+        if addGap { x += Metrics.buttonGap }
+    }
+
+    private func addSeparator(at x: inout CGFloat) {
+        x += Metrics.separatorLeadingSpace
+        let separator = NSView(frame: CGRect(
+            x: x,
+            y: (Self.preferredSize.height - 26) / 2,
+            width: Metrics.separatorWidth,
+            height: 26
+        ))
         separator.wantsLayer = true
-        separator.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.18).cgColor
+        separator.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.14).cgColor
         addSubview(separator)
+        x += Metrics.separatorWidth + Metrics.separatorTrailingSpace
     }
 
     @objc private func selectTool(_ sender: InlineToolbarButton) {
@@ -156,15 +238,22 @@ final class InlineCaptureToolbar: NSView {
 }
 
 private final class InlineToolbarButton: NSButton {
+    enum Role {
+        case standard
+        case destructive
+        case primary
+    }
+
     var isSelected = false { didSet { updateAppearance() } }
-    var isEmphasized = false { didSet { updateAppearance() } }
+    var role = Role.standard { didSet { updateAppearance() } }
     var accentColor = SnapSailStyle.accent { didSet { updateAppearance() } }
+    var usesAccentTint = false { didSet { updateAppearance() } }
     private var hovered = false
     private var tracking: NSTrackingArea?
 
     init(symbol: String, title: String, target: AnyObject?, action: Selector?) {
         super.init(frame: .zero)
-        image = SnapSailStyle.symbol(symbol, size: 22, weight: .regular)
+        image = SnapSailStyle.symbol(symbol, size: 20, weight: .medium)
         imagePosition = .imageOnly
         isBordered = false
         focusRingType = .none
@@ -172,7 +261,7 @@ private final class InlineToolbarButton: NSButton {
         self.target = target
         self.action = action
         wantsLayer = true
-        layer?.cornerRadius = 9
+        layer?.cornerRadius = 11
         updateAppearance()
     }
 
@@ -206,17 +295,32 @@ private final class InlineToolbarButton: NSButton {
     private func updateAppearance() {
         alphaValue = isEnabled ? 1 : 0.28
         if isSelected {
-            layer?.backgroundColor = accentColor.withAlphaComponent(0.14).cgColor
-            contentTintColor = accentColor
-        } else if isEmphasized {
-            layer?.backgroundColor = SnapSailStyle.accent.withAlphaComponent(0.12).cgColor
+            layer?.backgroundColor = SnapSailStyle.captureToolbarSelectionBackground.cgColor
             contentTintColor = SnapSailStyle.accent
+        } else if role == .primary {
+            layer?.backgroundColor = primaryBackground(hovered: hovered).cgColor
+            contentTintColor = .white
         } else if hovered && isEnabled {
-            layer?.backgroundColor = NSColor.black.withAlphaComponent(0.07).cgColor
-            contentTintColor = accentColor == .systemRed ? .systemRed : SnapSailStyle.captureToolbarForeground
+            layer?.backgroundColor = (
+                role == .destructive
+                    ? SnapSailStyle.captureToolbarDestructiveHoverBackground
+                    : SnapSailStyle.captureToolbarHoverBackground
+            ).cgColor
+            contentTintColor = foregroundColor
         } else {
             layer?.backgroundColor = NSColor.clear.cgColor
-            contentTintColor = accentColor == .systemRed ? .systemRed : SnapSailStyle.captureToolbarForeground
+            contentTintColor = foregroundColor
         }
+    }
+
+    private var foregroundColor: NSColor {
+        if role == .destructive { return .systemRed }
+        if usesAccentTint { return accentColor }
+        return SnapSailStyle.captureToolbarForeground
+    }
+
+    private func primaryBackground(hovered: Bool) -> NSColor {
+        guard hovered else { return SnapSailStyle.accent }
+        return SnapSailStyle.accent.blended(withFraction: 0.12, of: .black) ?? SnapSailStyle.accent
     }
 }
