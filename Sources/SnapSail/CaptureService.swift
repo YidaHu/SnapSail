@@ -16,6 +16,43 @@ struct WindowDescriptor {
     }
 }
 
+struct FrozenScreenCapture {
+    let appKitFrame: CGRect
+    let image: CGImage
+
+    func image(in appKitRect: CGRect) -> CGImage? {
+        guard let pixelRect = FrozenCaptureGeometry.pixelCropRect(
+            appKitRect: appKitRect,
+            screenFrame: appKitFrame,
+            imagePixelSize: CGSize(width: image.width, height: image.height)
+        ) else { return nil }
+        return image.cropping(to: pixelRect)
+    }
+}
+
+struct FrozenDesktopCapture {
+    let screens: [FrozenScreenCapture]
+
+    func screen(matching appKitFrame: CGRect) -> FrozenScreenCapture? {
+        screens.first { $0.appKitFrame == appKitFrame }
+    }
+
+    func image(in appKitRect: CGRect) -> CGImage? {
+        let midpoint = CGPoint(x: appKitRect.midX, y: appKitRect.midY)
+        let screen = screens.first { $0.appKitFrame.contains(midpoint) }
+            ?? screens.max {
+                intersectionArea($0.appKitFrame, appKitRect) < intersectionArea($1.appKitFrame, appKitRect)
+            }
+        return screen?.image(in: appKitRect)
+    }
+
+    private func intersectionArea(_ lhs: CGRect, _ rhs: CGRect) -> CGFloat {
+        let intersection = lhs.intersection(rhs)
+        guard !intersection.isNull else { return 0 }
+        return intersection.width * intersection.height
+    }
+}
+
 final class CaptureService {
     var primaryScreenHeight: CGFloat {
         NSScreen.screens.first(where: { $0.frame.origin == .zero })?.frame.height
@@ -68,6 +105,19 @@ final class CaptureService {
             window.id,
             options
         )
+    }
+
+    func freezeDesktop() -> FrozenDesktopCapture? {
+        let displays = NSScreen.screens
+        guard !displays.isEmpty else { return nil }
+
+        var screens: [FrozenScreenCapture] = []
+        screens.reserveCapacity(displays.count)
+        for display in displays {
+            guard let image = capture(appKitRect: display.frame) else { return nil }
+            screens.append(FrozenScreenCapture(appKitFrame: display.frame, image: image))
+        }
+        return FrozenDesktopCapture(screens: screens)
     }
 
     func windows() -> [WindowDescriptor] {

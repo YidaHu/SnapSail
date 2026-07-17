@@ -29,6 +29,7 @@ struct SelectionOutcome {
 final class SelectionOverlayController: NSObject {
     private var mode: SelectionMode
     private let captureService: CaptureService
+    private let frozenDesktop: FrozenDesktopCapture?
     private let completion: (SelectionOutcome?) -> Void
     private var overlayWindows: [NSWindow] = []
     private var overlayViews: [SelectionOverlayView] = []
@@ -38,9 +39,15 @@ final class SelectionOverlayController: NSObject {
     private weak var activeView: SelectionOverlayView?
     private var completed = false
 
-    init(mode: SelectionMode, captureService: CaptureService, completion: @escaping (SelectionOutcome?) -> Void) {
+    init(
+        mode: SelectionMode,
+        captureService: CaptureService,
+        frozenDesktop: FrozenDesktopCapture? = nil,
+        completion: @escaping (SelectionOutcome?) -> Void
+    ) {
         self.mode = mode
         self.captureService = captureService
+        self.frozenDesktop = frozenDesktop
         self.completion = completion
         super.init()
     }
@@ -64,7 +71,11 @@ final class SelectionOverlayController: NSObject {
             window.hasShadow = false
             window.ignoresMouseEvents = false
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-            let view = SelectionOverlayView(screen: screen, controller: self)
+            let view = SelectionOverlayView(
+                screen: screen,
+                frozenBackground: frozenDesktop?.screen(matching: screen.frame)?.image,
+                controller: self
+            )
             window.contentView = view
             window.acceptsMouseMovedEvents = true
             overlayWindows.append(window)
@@ -148,6 +159,7 @@ final class SelectionOverlayController: NSObject {
             width: size.width,
             height: size.height
         )
+        if let frozen = frozenDesktop?.image(in: appKitRect) { return frozen }
         return CGWindowListCreateImage(
             captureService.quartzRect(fromAppKitRect: appKitRect),
             .optionOnScreenBelowWindow,
@@ -157,7 +169,8 @@ final class SelectionOverlayController: NSObject {
     }
 
     func annotationSourceImage(in appKitRect: CGRect, below windowNumber: Int) -> CGImage? {
-        CGWindowListCreateImage(
+        if let frozen = frozenDesktop?.image(in: appKitRect) { return frozen }
+        return CGWindowListCreateImage(
             captureService.quartzRect(fromAppKitRect: appKitRect).integral,
             .optionOnScreenBelowWindow,
             CGWindowID(windowNumber),
@@ -213,6 +226,7 @@ private enum RegionInteraction {
 final class SelectionOverlayView: NSView {
     private weak var controller: SelectionOverlayController?
     private let screen: NSScreen
+    private let frozenBackground: NSImage?
     private var selection: SelectionModel
     private var interaction: RegionInteraction = .idle
     private let toolbar = InlineCaptureToolbar(frame: CGRect(origin: .zero, size: InlineCaptureToolbar.preferredSize))
@@ -229,8 +243,11 @@ final class SelectionOverlayView: NSView {
     private var textAnchor: CGPoint?
     private weak var inlineTextField: NSTextField?
 
-    init(screen: NSScreen, controller: SelectionOverlayController) {
+    init(screen: NSScreen, frozenBackground: CGImage?, controller: SelectionOverlayController) {
         self.screen = screen
+        self.frozenBackground = frozenBackground.map { image in
+            NSImage(cgImage: image, size: screen.frame.size)
+        }
         self.controller = controller
         selection = SelectionModel(bounds: CGRect(origin: .zero, size: screen.frame.size))
         super.init(frame: CGRect(origin: .zero, size: screen.frame.size))
@@ -286,6 +303,7 @@ final class SelectionOverlayView: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
+        drawFrozenBackground()
         SnapSailStyle.overlayDim.setFill()
         bounds.fill()
 
@@ -294,6 +312,7 @@ final class SelectionOverlayView: NSView {
             NSColor.clear.setFill()
             region.fill(using: .copy)
             NSGraphicsContext.restoreGraphicsState()
+            drawFrozenBackground(in: region)
 
             SnapSailStyle.selectionFill.setFill()
             region.fill()
@@ -340,6 +359,11 @@ final class SelectionOverlayView: NSView {
         if controller?.selectionMode == .window || selection.region == nil {
             drawInstruction()
         }
+    }
+
+    private func drawFrozenBackground(in clipRect: CGRect? = nil) {
+        guard let frozenBackground else { return }
+        FrozenBackgroundPainter.draw(frozenBackground, in: bounds, clippedTo: clipRect)
     }
 
     override func mouseDown(with event: NSEvent) {

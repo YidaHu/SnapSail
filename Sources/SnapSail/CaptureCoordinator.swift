@@ -104,14 +104,22 @@ final class CaptureCoordinator {
     private func beginAreaCapture(scrolling: Bool) {
         guard selectionOverlay == nil else { return }
         guard ensurePermission() else { return }
-        selectionOverlay = SelectionOverlayController(mode: .region, captureService: captureService) { [weak self] outcome in
+        guard let frozenDesktop = captureService.freezeDesktop() else {
+            showCaptureFailure()
+            return
+        }
+        selectionOverlay = SelectionOverlayController(
+            mode: .region,
+            captureService: captureService,
+            frozenDesktop: frozenDesktop
+        ) { [weak self] outcome in
             guard let self else { return }
             self.selectionOverlay = nil
             guard let outcome, case .region(let rect) = outcome.selection else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 let action: SelectionAction = scrolling ? .scroll : outcome.action
                 if action == .scroll { self.startScrolling(rect: rect) }
-                else if let image = self.captureService.capture(appKitRect: rect),
+                else if let image = frozenDesktop.image(in: rect),
                         let rendered = InlineAnnotationRenderer.render(
                             base: image,
                             annotations: outcome.annotations,
