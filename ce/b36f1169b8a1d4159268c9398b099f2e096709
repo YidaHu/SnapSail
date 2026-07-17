@@ -1,0 +1,39 @@
+Sources/SnapSail/FrozenBackgroundPainter.swift
+  s_78304cd770e4c8::t_b5bcbab7bd837a 1-24
+Sources/SnapSailCore/FrozenCaptureGeometry.swift
+  s_78304cd770e4c8::t_e13090c55089c9 1-32
+Tests/SnapSailCoreTests/SelectionOverlaySafetyTests.swift
+  s_78304cd770e4c8::t_9f242861f7f736 5-31
+  s_78304cd770e4c8::t_434daa2fec5af6 32-50
+Sources/SnapSail/SelectionOverlay.swift
+  s_78304cd770e4c8::t_b5bcbab7bd837a 306,315,364-366
+  s_78304cd770e4c8::t_0dbbcefb2f1f43 173
+  s_78304cd770e4c8::t_e13090c55089c9 32,42-47,50,74-78,162,172,229,246,248-250
+  s_78304cd770e4c8::t_d3c216add4e27b 367-368
+Sources/SnapSail/CaptureCoordinator.swift
+  s_78304cd770e4c8::t_e13090c55089c9 107-115,122
+Sources/SnapSail/CaptureService.swift
+  s_78304cd770e4c8::t_e13090c55089c9 19-55,110-121
+  s_78304cd770e4c8::t_330e2b906c3225 122
+Tests/SnapSailCoreTests/FrozenCaptureGeometryTests.swift
+  s_78304cd770e4c8::t_9f242861f7f736 1-43
+Tests/SnapSailCoreTests/FrozenBackgroundPainterTests.swift
+  s_78304cd770e4c8::t_434daa2fec5af6 1-22,27-43
+  s_78304cd770e4c8::t_8b5aae947edff4 23-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "ceb36f1169b8a1d4159268c9398b099f2e096709",
+  "prompts": {},
+  "sessions": {
+    "s_78304cd770e4c8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f7035-6b0e-76d2-8866-dfbfdf1af665",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "YidaHu <huyidada@gmail.com>"
+    }
+  }
+}
