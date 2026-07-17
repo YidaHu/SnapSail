@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "active_feature": null,
+  "status_values": [
+    "backlog",
+    "in-progress",
+    "blocked",
+    "done"
+  ],
+  "features": [
+    {
+      "id": "harness-001",
+      "name": "Create initial agent harness",
+      "description": "Add project instructions, persistent task state, verification commands, scope controls, and session handoff procedures.",
+      "dependencies": [],
+      "status": "done",
+      "acceptance_criteria": [
+        "All five harness subsystems are represented by repository artifacts.",
+        "The standard initialization command runs the full XCTest suite.",
+        "A new agent session has an explicit startup and handoff workflow."
+      ],
+      "evidence": [
+        "AGENTS.md routes agents through startup, scope, safety, verification, and shutdown rules.",
+        "init.sh supports quick, standard test, and signed Release verification modes.",
+        "progress.md and session-handoff.md provide cross-session continuity.",
+        "./init.sh passed 55 tests with 0 failures on 2026-07-17."
+      ]
+    },
+    {
+      "id": "fix-001",
+      "name": "Preserve transient popups in captures",
+      "description": "Freeze visible screen content before SnapSail activation so WPS filter menus and other focus-sensitive popups remain in area screenshots.",
+      "dependencies": [],
+      "status": "done",
+      "acceptance_criteria": [
+        "Area capture uses pixels captured before the selection overlay activates SnapSail.",
+        "Frozen capture supports selections on every connected display at Retina resolution.",
+        "Existing first-drag, keyboard, annotation, and overlay teardown behavior remains covered.",
+        "Scrolling capture continues to use live screen frames."
+      ],
+      "evidence": [
+        "TDD RED: FrozenCaptureGeometryTests initially failed because FrozenCaptureGeometry did not exist.",
+        "TDD RED: FrozenBackgroundPainterTests initially failed because FrozenBackgroundPainter did not exist.",
+        "Focused geometry, compositing, and SelectionOverlaySafetyTests pass.",
+        "./init.sh --release passed 62 tests with 0 failures and verified the signed app bundle on 2026-07-17.",
+        "Code review found no remaining Critical or Important issues after the clipped frozen-background redraw fix.",
+        "New build launched as build/SnapSail.app with zero overlay windows at idle.",
+        "Manual WPS verification confirmed both the area-selection preview and final image retain the open filter dropdown."
+      ]
+    }
+  ]
+}
